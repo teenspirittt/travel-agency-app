@@ -1,0 +1,9 @@
+#c files
+*.o
+
+#docs
+*.docx
+*.docx#
+
+#properties
+*.properties
