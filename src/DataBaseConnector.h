@@ -3,6 +3,10 @@
 
 #include <sql.h>
 #include <sqlext.h>
+#include <string>
+#include <iostream>
+#include <fstream>
+
 
 class DataBaseConnector {
 public:

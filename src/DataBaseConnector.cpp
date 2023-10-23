@@ -1,10 +1,5 @@
 #include "DataBaseConnector.h"
-#include <sql.h>
-#include <sqlext.h>
-#include <iostream>
-#include <fstream>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
+
 
 DataBaseConnector::DataBaseConnector() {
     henv = SQL_NULL_HENV;
@@ -55,19 +50,30 @@ SQLHDBC DataBaseConnector::getConnection() {
 }
 
 bool DataBaseConnector::readConfigFile(const std::string& configFile) {
-    boost::property_tree::ptree pt;
-    
-    try {
-        boost::property_tree::ini_parser::read_ini(configFile, pt);
-        
-        dsn = pt.get<std::string>("database.dsn");
-        name = pt.get<std::string>("database.name");
-        user = pt.get<std::string>("database.user");
-        password = pt.get<std::string>("database.password");
-        
-        return true;
-    } catch (const boost::property_tree::ptree_error& e) {
-        std::cerr << "Error reading configuration file: " << e.what() << std::endl;
-        return false;
+    std::ifstream file(configFile);
+    if (!file.is_open()) {
+        return false; // Не удалось открыть файл
     }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        size_t pos = line.find('=');
+        if (pos != std::string::npos) {
+            std::string name = line.substr(0, pos);
+            std::string value = line.substr(pos + 1);
+            
+            if (name == "database.dsn") {
+                dsn = value;
+            } else if (name == "database.name") {
+                name = value;
+            } else if (name == "database.user") {
+                user = value;
+            } else if (name == "database.password") {
+                password = value;
+            }
+        }
+    }
+
+    file.close();
+    return true;
 }
