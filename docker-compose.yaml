@@ -1,0 +1,15 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: rpbd_pg
+    environment:
+      POSTGRES_DB: tourism_db
+      POSTGRES_USER: tour_admin
+      POSTGRES_PASSWORD: tour
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:

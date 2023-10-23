@@ -28,7 +28,10 @@ bool DataBaseConnector::connect() {
         return false;
     }
 
-    std::string connectionString = "DSN=" + dsn + ";Database=" + name + ";UID=" + user + ";PWD=" + password;
+    server = "localhost";
+    std::string connectionString = "DRIVER={PostgreSQL};DATABASE=" + dbname + ";SERVER=" + server + ";PORT=" + std::to_string(port) + ";UID=" + user + ";PWD=" + password;
+    
+
     ret = SQLDriverConnect(hdbc, NULL, (SQLCHAR*)connectionString.c_str(), SQL_NTS, NULL, 0, NULL, SQL_DRIVER_COMPLETE);
 
     return ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO;
@@ -52,7 +55,7 @@ SQLHDBC DataBaseConnector::getConnection() {
 bool DataBaseConnector::readConfigFile(const std::string& configFile) {
     std::ifstream file(configFile);
     if (!file.is_open()) {
-        return false; // Не удалось открыть файл
+        return false;
     }
 
     std::string line;
@@ -62,14 +65,16 @@ bool DataBaseConnector::readConfigFile(const std::string& configFile) {
             std::string name = line.substr(0, pos);
             std::string value = line.substr(pos + 1);
             
-            if (name == "database.dsn") {
-                dsn = value;
-            } else if (name == "database.name") {
-                name = value;
+            if (name == "database.name") {
+                dbname = value;
             } else if (name == "database.user") {
                 user = value;
             } else if (name == "database.password") {
                 password = value;
+            } else if (name == "database.host") {
+                server = value;
+            } else if (name == "database.port") {
+                port = std::stoi(value);
             }
         }
     }

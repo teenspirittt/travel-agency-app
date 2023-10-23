@@ -24,9 +24,11 @@ private:
     SQLHDBC hdbc;
    
     std::string dsn;
-    std::string name;
+    std::string dbname;
     std::string user;
     std::string password;
+    std::string server;
+    int port;
 };
 
 #endif // DATABASECONNECTOR_H
