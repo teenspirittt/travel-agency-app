@@ -18,6 +18,7 @@ class DataBaseConnector {
   SQLHDBC getConnection();
 
   bool readConfigFile(const std::string& configFile);
+  SQLHENV getHDBC() { return hdbc; }
 
  private:
   SQLHENV henv;

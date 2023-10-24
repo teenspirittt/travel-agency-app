@@ -16,3 +16,6 @@ build
 
 #todo
 todo
+
+#sql
+*.sql

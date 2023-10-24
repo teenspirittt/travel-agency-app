@@ -9,6 +9,9 @@ BINDIR = build
 
 SOURCES = $(wildcard $(SRCDIR)/*.cpp)
 SOURCES += $(wildcard $(SRCDIR)/utils/*.cpp)
+SOURCES += $(wildcard $(SRCDIR)/models/*.cpp)
+SOURCES += $(wildcard $(SRCDIR)/gateways/*.cpp)
+
 OBJECTS = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SOURCES))
 
 EXECUTABLE = $(BINDIR)/rpbd

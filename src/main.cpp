@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "./gateways/AircraftGateway.h"
 #include "./utils/DataBaseConnector.h"
 #include "./utils/DataBaseInitializer.h"
 
@@ -19,6 +20,14 @@ int main() {
       std::cout << "Init database";
     } else {
       std::cout << "Init database error";
+    }
+
+    AircraftGateway aircraftGateway(dbConnector.getHDBC());
+
+    if (aircraftGateway.insertAircraft("A380", 12, "Airbus", 555)) {
+      std::cout << "Aircraft inserted successfully." << std::endl;
+    } else {
+      std::cerr << "Failed to insert aircraft." << std::endl;
     }
 
     dbConnector.disconnect();
