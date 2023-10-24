@@ -8,6 +8,7 @@ OBJDIR = build
 BINDIR = build
 
 SOURCES = $(wildcard $(SRCDIR)/*.cpp)
+SOURCES += $(wildcard $(SRCDIR)/utils/*.cpp)
 OBJECTS = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SOURCES))
 
 EXECUTABLE = $(BINDIR)/rpbd

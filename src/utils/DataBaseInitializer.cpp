@@ -32,12 +32,12 @@ bool DataBaseInitializer::checkTableExists(const std::string &tableName) {
     return false;
   }
 
-  // Проверяем существование таблицы
   std::string query =
-      "SELECT 1 FROM information_schema.tables WHERE table_name = ?";
+      "SELECT table_name FROM information_schema.tables WHERE table_name = ?";
   ret = SQLPrepare(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
 
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+    std::cerr << "Ошибка при подготовке запроса SQL." << std::endl;
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return false;
   }
@@ -46,24 +46,33 @@ bool DataBaseInitializer::checkTableExists(const std::string &tableName) {
                          0, (SQLPOINTER)tableName.c_str(), 0, NULL);
 
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+    // Обработка ошибки при привязке параметра
+    std::cerr << "Ошибка при привязке параметра к запросу SQL." << std::endl;
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return false;
   }
 
+  // Выполнение запроса
   ret = SQLExecute(hstmt);
 
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+  if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+    SQLLEN rowCount;
+    ret = SQLRowCount(hstmt, &rowCount);
+    if (rowCount > 0) {
+      // Таблица существует
+      SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+      return true;
+    } else {
+      // Таблица не существует
+      SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+      return false;
+    }
+  } else {
+    // Обработка ошибки выполнения запроса
+    std::cerr << "Ошибка выполнения запроса SQL." << std::endl;
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return false;
   }
-
-  ret = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    return false;
-  }
-
-  return true;
 }
 
 bool DataBaseInitializer::createTables() {
@@ -76,7 +85,7 @@ bool DataBaseInitializer::createTables() {
   }
 
   std::string createEmployeesTable =
-      "CREATE TABLE employees ("
+      "CREATE TABLE IF NOT EXISTS employees ("
       "id serial primary key,"
       "full_name varchar(255) not null,"
       "address text,"
@@ -86,7 +95,7 @@ bool DataBaseInitializer::createTables() {
       ")";
 
   std::string createEmployeeTransfersTable =
-      "CREATE TABLE EmployeeTransfers ("
+      "CREATE TABLE IF NOT EXISTS employee_transfers ("
       "id serial PRIMARY KEY,"
       "employee_id int NOT NULL,"
       "new_position varchar(255),"
@@ -96,7 +105,7 @@ bool DataBaseInitializer::createTables() {
       ");";
 
   std::string createHotelsTable =
-      "CREATE TABLE Hotels ("
+      "CREATE TABLE IF NOT EXISTS hotels ("
       "id serial PRIMARY KEY,"
       "name varchar(255) NOT NULL,"
       "class int,"
@@ -104,7 +113,7 @@ bool DataBaseInitializer::createTables() {
       ");";
 
   std::string createFlightsTable =
-      "CREATE TABLE Flights ("
+      "CREATE TABLE IF NOT EXISTS flights ("
       "id serial PRIMARY KEY,"
       "flight_number varchar(50) NOT NULL,"
       "departure_date timestamp NOT NULL,"
@@ -115,7 +124,7 @@ bool DataBaseInitializer::createTables() {
       ");";
 
   std::string createRouteTable =
-      "CREATE TABLE Route ("
+      "CREATE TABLE IF NOT EXISTS route ("
       "id serial PRIMARY KEY,"
       "name varchar(255) NOT NULL,"
       "country varchar(255),"
@@ -129,7 +138,7 @@ bool DataBaseInitializer::createTables() {
       ");";
 
   std::string createClientsTable =
-      "CREATE TABLE Clients ("
+      "CREATE TABLE IF NOT EXISTS clients ("
       "id serial PRIMARY KEY,"
       "full_name varchar(255) NOT NULL,"
       "phone varchar(20) NOT NULL,"
@@ -140,21 +149,19 @@ bool DataBaseInitializer::createTables() {
       ");";
 
   std::string createCarriersTable =
-      "CREATE TABLE Carriers ("
+      "CREATE TABLE IF NOT EXISTS carriers ("
       "id serial PRIMARY KEY,"
       "name varchar(255) NOT NULL"
       ");";
 
   std::string createAircraftTable =
-      "CREATE TABLE Aircraft ("
+      "CREATE TABLE IF NOT EXISTS aircraft ("
       "id serial PRIMARY KEY,"
       "aircraft_type varchar(255) NOT NULL,"
       "carrier_id int,"
       "manufacturer varchar(255),"
       "capacity int"
       ");";
-
-  // Добавьте аналогичные запросы для остальных таблиц
 
   ret = SQLExecDirect(hstmt, (SQLCHAR *)createEmployeesTable.c_str(), SQL_NTS);
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {

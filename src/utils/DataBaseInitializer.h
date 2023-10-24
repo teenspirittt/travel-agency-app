@@ -1,19 +1,19 @@
 #ifndef DATABASE_INITIALIZER_H
 #define DATABASE_INITIALIZER_H
 
-#include "DataBaseConnector.h"
+#include "../DataBaseConnector.h"
 
 class DataBaseInitializer {
-public:
-    DataBaseInitializer(DataBaseConnector& connector);
+ public:
+  DataBaseInitializer(DataBaseConnector& connector);
 
-    bool initializeDataBase();
+  bool initializeDataBase();
 
-private:
-    DataBaseConnector& dbConnector;
+ private:
+  DataBaseConnector& dbConnector;
 
-    bool checkTableExists(const std::string& tableName);
-    bool createTables();
+  bool checkTableExists(const std::string& tableName);
+  bool createTables();
 };
 
-#endif // DATABASE_INITIALIZER_H
+#endif  // DATABASE_INITIALIZER_H
