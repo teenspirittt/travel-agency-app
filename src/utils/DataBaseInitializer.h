@@ -1,7 +1,9 @@
 #ifndef DATABASE_INITIALIZER_H
 #define DATABASE_INITIALIZER_H
 
-#include "../DataBaseConnector.h"
+#include <iostream>
+
+#include "DataBaseConnector.h"
 
 class DataBaseInitializer {
  public:

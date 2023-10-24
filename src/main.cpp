@@ -1,7 +1,7 @@
 #include <iostream>
 
+#include "./utils/DataBaseConnector.h"
 #include "./utils/DataBaseInitializer.h"
-#include "DataBaseConnector.h"
 
 int main() {
   DataBaseConnector dbConnector;

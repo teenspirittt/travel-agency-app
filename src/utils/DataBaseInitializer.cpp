@@ -1,7 +1,5 @@
 #include "DataBaseInitializer.h"
 
-#include <iostream>
-
 DataBaseInitializer::DataBaseInitializer(DataBaseConnector &connector)
     : dbConnector(connector) {}
 
@@ -9,7 +7,8 @@ bool DataBaseInitializer::initializeDataBase() {
   if (checkTableExists("employees") && checkTableExists("employee_transfers") &&
       checkTableExists("hotels") && checkTableExists("flights") &&
       checkTableExists("route") && checkTableExists("clients") &&
-      checkTableExists("carriers") && checkTableExists("aircraft")) {
+      checkTableExists("carriers") && checkTableExists("aircraft") &&
+      checkTableExists("client_route")) {
     std::cout << "All necessary tables exist." << std::endl;
     return true;
   } else {
@@ -37,7 +36,8 @@ bool DataBaseInitializer::checkTableExists(const std::string &tableName) {
   ret = SQLPrepare(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
 
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    std::cerr << "Ошибка при подготовке запроса SQL." << std::endl;
+    std::cerr << "An error occurred while preparing the SQL query."
+              << std::endl;
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return false;
   }
@@ -46,30 +46,25 @@ bool DataBaseInitializer::checkTableExists(const std::string &tableName) {
                          0, (SQLPOINTER)tableName.c_str(), 0, NULL);
 
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    // Обработка ошибки при привязке параметра
-    std::cerr << "Ошибка при привязке параметра к запросу SQL." << std::endl;
+    std::cerr << "Error binding parameter to SQL query." << std::endl;
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return false;
   }
 
-  // Выполнение запроса
   ret = SQLExecute(hstmt);
 
   if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
     SQLLEN rowCount;
     ret = SQLRowCount(hstmt, &rowCount);
     if (rowCount > 0) {
-      // Таблица существует
       SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
       return true;
     } else {
-      // Таблица не существует
       SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
       return false;
     }
   } else {
-    // Обработка ошибки выполнения запроса
-    std::cerr << "Ошибка выполнения запроса SQL." << std::endl;
+    std::cerr << "Error executing SQL query." << std::endl;
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return false;
   }
@@ -163,6 +158,31 @@ bool DataBaseInitializer::createTables() {
       "capacity int"
       ");";
 
+  std::string createClientRoute =
+      "CREATE TABLE IF NOT EXISTS client_route ("
+      "client_id int,"
+      "route_id int,"
+      "primary key(client_id, route_id)"
+      ");";
+
+  std::string createReferences =
+      "ALTER TABLE employee_transfers "
+      "ADD FOREIGN KEY (employee_id) REFERENCES employees (id);"
+      "ALTER TABLE flights "
+      "ADD FOREIGN KEY (aircraft_id) REFERENCES aircraft (id);"
+      "ALTER TABLE route "
+      "ADD FOREIGN KEY (hotel_id) REFERENCES hotels (id);"
+      "ALTER TABLE route "
+      "ADD FOREIGN KEY (flight_id) REFERENCES flights (id);"
+      "ALTER TABLE route "
+      "ADD FOREIGN KEY (employee_id) REFERENCES employees (id);"
+      "ALTER TABLE aircraft "
+      "ADD FOREIGN KEY (carrier_id) REFERENCES carriers (id);"
+      "ALTER TABLE client_route "
+      "ADD FOREIGN KEY (client_id) REFERENCES clients (id);"
+      "ALTER TABLE client_route "
+      "ADD FOREIGN KEY (route_id) REFERENCES route (id);";
+
   ret = SQLExecDirect(hstmt, (SQLCHAR *)createEmployeesTable.c_str(), SQL_NTS);
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
@@ -207,6 +227,12 @@ bool DataBaseInitializer::createTables() {
   }
 
   ret = SQLExecDirect(hstmt, (SQLCHAR *)createAircraftTable.c_str(), SQL_NTS);
+  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    return false;
+  }
+
+  ret = SQLExecDirect(hstmt, (SQLCHAR *)createReferences.c_str(), SQL_NTS);
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return false;
