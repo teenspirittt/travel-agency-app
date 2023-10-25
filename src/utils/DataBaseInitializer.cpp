@@ -93,7 +93,7 @@ bool DataBaseInitializer::createTables() {
       "CREATE TABLE IF NOT EXISTS employee_transfers ("
       "id serial PRIMARY KEY,"
       "employee_id int NOT NULL,"
-      "new_position varchar(255),"
+      "old_position varchar(255),"
       "transfer_reason text,"
       "order_number varchar(50),"
       "order_date date"
