@@ -3,6 +3,7 @@
 #include "./gateways/AircraftGateway.h"
 #include "./gateways/CarrierGateway.h"
 #include "./gateways/FlightsGateway.h"
+#include "./gateways/HotelGateway.h"
 #include "./models/Aircraft.h"
 #include "./utils/DataBaseConnector.h"
 #include "./utils/DataBaseInitializer.h"
@@ -25,182 +26,65 @@ int main() {
       std::cout << "Init database error";
     }
 
-    AircraftGateway aircraftGateway;
+    HotelGateway hotelGateway;
 
-    if (aircraftGateway.insertAircraft("A380", 12, "Airbus", 555)) {
-      std::cout << "Aircraft inserted successfully." << std::endl;
+    // Тест метода insertHotel
+    if (hotelGateway.insertHotel("Hotel A", 4, "Standard")) {
+      std::cout << "Hotel inserted successfully." << std::endl;
     } else {
-      std::cerr << "Failed to insert aircraft." << std::endl;
+      std::cerr << "Failed to insert hotel." << std::endl;
     }
 
-    if (aircraftGateway.deleteAircraft(12)) {
-      std::cout << "Aircraft deleted successfully." << std::endl;
+    // Тест метода deleteHotel
+    if (hotelGateway.deleteHotel(1)) {
+      std::cout << "Hotel deleted successfully." << std::endl;
     } else {
-      std::cerr << "Failed to delete aircraft." << std::endl;
+      std::cerr << "Failed to delete hotel." << std::endl;
     }
 
-    Aircraft aircraft(4);
-    std::string aircraftType;
-    int carrierId;
-    std::string manufacturer;
-    int capacity;
+    // Тест метода getHotel
+    int hotelId = 5;
+    std::string name;
+    int hotelClass;
+    std::string roomCategory;
 
-    if (aircraftGateway.getAircraft(4, aircraftType, carrierId, manufacturer,
-                                    capacity)) {
-      std::cout << "Aircraft get successfully." << std::endl;
-      std::cout << "Aircraft ID: " << aircraft.getId() << std::endl;
-      std::cout << "Aircraft Type: " << aircraftType << std::endl;
-      std::cout << "Carrier ID: " << carrierId << std::endl;
-      std::cout << "Manufacturer: " << manufacturer << std::endl;
-      std::cout << "Capacity: " << capacity << std::endl;
+    if (hotelGateway.getHotel(hotelId, name, hotelClass, roomCategory)) {
+      std::cout << "Hotel get successfully." << std::endl;
+      std::cout << "Hotel ID: " << hotelId << std::endl;
+      std::cout << "Name: " << name << std::endl;
+      std::cout << "Hotel Class: " << hotelClass << std::endl;
+      std::cout << "Room Category: " << roomCategory << std::endl;
     } else {
-      std::cerr << "Failed to get aircraft." << std::endl;
+      std::cerr << "Failed to get hotel." << std::endl;
     }
 
-    if (aircraftGateway.updateAircraft(10, "Boeing 747", 12, "Boeing", 500)) {
-      std::cout << "Aircraft updated successfully." << std::endl;
+    // Тест метода updateHotel
+    if (hotelGateway.updateHotel(5, "Updated Hotel", 5, "Luxury")) {
+      std::cout << "Hotel updated successfully." << std::endl;
     } else {
-      std::cerr << "Failed to update aircraft." << std::endl;
+      std::cerr << "Failed to update hotel." << std::endl;
     }
 
-    std::vector<int> matchingAircraftIds;
-    if (aircraftGateway.findAircraftByType("Boeing 747", matchingAircraftIds)) {
-      std::cout << "Aircrafts by type was found successfully." << std::endl;
-      for (int aircraftId : matchingAircraftIds) {
-        std::cout << "Matching Aircraft ID: " << aircraftId << std::endl;
+    // Тест метода getAllHotels
+    std::vector<int> hotelIds;
+    if (hotelGateway.getAllHotels(hotelIds)) {
+      std::cout << "Hotels were found successfully." << std::endl;
+      for (int id : hotelIds) {
+        std::cout << "Hotel ID: " << id << std::endl;
       }
     } else {
-      std::cerr << "Failed to find aircraft." << std::endl;
+      std::cerr << "Failed to get all hotels." << std::endl;
     }
 
-    std::vector<int> aircraftIds;
-    if (aircraftGateway.getAllAircraft(aircraftIds)) {
-      std::cout << "Aircrafts was found successfully." << std::endl;
-
-      for (int aircraftId : aircraftIds) {
-        std::cout << "Aircraft ID: " << aircraftId << std::endl;
-      }
-
-    } else {
-      std::cerr << "Failed to get all aircraft.s" << std::endl;
-    }
-
-    std::vector<int> matchingAircraftIds2;
-    if (aircraftGateway.findAircraftByCarrier(12, matchingAircraftIds2)) {
-      std::cout << "Aircrafts by carrier was found successfully." << std::endl;
-      for (int aircraftId : matchingAircraftIds2) {
-        std::cout << "Matching Aircraft ID: " << aircraftId << std::endl;
+    // Тест метода findHotelsByName
+    std::vector<int> matchingHotelIds;
+    if (hotelGateway.findHotelsByName("Updated Hotel", matchingHotelIds)) {
+      std::cout << "Hotels by name were found successfully." << std::endl;
+      for (int id : matchingHotelIds) {
+        std::cout << "Matching Hotel ID: " << id << std::endl;
       }
     } else {
-      std::cerr << "Failed to find aircraft." << std::endl;
-    }
-    std::cout << std::endl;
-    CarrierGateway carrierGateway;
-
-    if (carrierGateway.insertCarrier("Emirates")) {
-      std::cout << "Carrier inserted successfully." << std::endl;
-    } else {
-      std::cerr << "Failed to insert carrier." << std::endl;
-    }
-
-    if (carrierGateway.deleteCarrier(1)) {
-      std::cout << "Carrier deleted successfully." << std::endl;
-    } else {
-      std::cerr << "Failed to delete carrier." << std::endl;
-    }
-
-    std::string carrierName;
-    if (carrierGateway.getCarrier(12, carrierName)) {
-      std::cout << "Carrier get successfully." << std::endl;
-      std::cout << "Carrier Name: " << carrierName << std::endl;
-    } else {
-      std::cerr << "Failed to get carrier." << std::endl;
-    }
-
-    if (carrierGateway.updateCarrier(12, "Qatar Airways")) {
-      std::cout << "Carrier updated successfully." << std::endl;
-    } else {
-      std::cerr << "Failed to update carrier." << std::endl;
-    }
-
-    std::vector<int> carrierIds;
-    if (carrierGateway.getAllCarriers(carrierIds)) {
-      std::cout << "Carriers were found successfully." << std::endl;
-      for (int carrierId : carrierIds) {
-        std::cout << "Carrier ID: " << carrierId << std::endl;
-      }
-    } else {
-      std::cerr << "Failed to get all carriers." << std::endl;
-    }
-    std::cout << std::endl;
-
-    FlightsGateway flightsGateway;
-
-    if (flightsGateway.insertFlight("F123", "2023-10-15 08:00:00", 9, "Economy",
-                                    200, 1)) {
-      std::cout << "Flight inserted successfully." << std::endl;
-    } else {
-      std::cerr << "Failed to insert flight." << std::endl;
-    }
-
-    std::string flightNumber, departureDate, flightClass;
-    int aircraftId, availableSeats, carrierIdF;
-    if (flightsGateway.getFlight(1, flightNumber, departureDate, aircraftId,
-                                 flightClass, availableSeats, carrierIdF)) {
-      std::cout << "Flight found successfully." << std::endl;
-      std::cout << "Flight Number: " << flightNumber << std::endl;
-      std::cout << "Departure Date: " << departureDate << std::endl;
-      std::cout << "Aircraft ID: " << aircraftId << std::endl;
-      std::cout << "Flight Class: " << flightClass << std::endl;
-      std::cout << "Available Seats: " << availableSeats << std::endl;
-      std::cout << "Carrier ID: " << carrierIdF << std::endl;
-    } else {
-      std::cerr << "Failed to find flight." << std::endl;
-    }
-
-    if (flightsGateway.updateFlight(1, "F124", "2023-10-16 09:00:00", 24,
-                                    "Business", 180, 2)) {
-      std::cout << "Flight updated successfully." << std::endl;
-    } else {
-      std::cerr << "Failed to update flight." << std::endl;
-    }
-
-    if (flightsGateway.deleteFlight(4)) {
-      std::cout << "Flight deleted successfully." << std::endl;
-    } else {
-      std::cerr << "Failed to delete Flight." << std::endl;
-    }
-
-    std::vector<int> matchingFlightIds;
-    if (flightsGateway.findFlightsByNumber("F124", matchingFlightIds)) {
-      std::cout << "Flights by number were found successfully." << std::endl;
-      for (int flightId : matchingFlightIds) {
-        std::cout << "Matching Flight ID: " << flightId << std::endl;
-      }
-    } else {
-      std::cerr << "Failed to find flights by number." << std::endl;
-    }
-
-    std::vector<int> matchingFlightIdsByAircraft;
-    if (flightsGateway.findFlightsByAircraft(24, matchingFlightIdsByAircraft)) {
-      std::cout << "Flights by aircraft were found successfully." << std::endl;
-      for (int flightId : matchingFlightIdsByAircraft) {
-        std::cout << "Matching Flight ID: " << flightId << std::endl;
-      }
-    } else {
-      std::cerr << "Failed to find flights by aircraft." << std::endl;
-    }
-
-    std::vector<int> flightsIds;
-    if (flightsGateway.getAllFlights(flightsIds)) {
-      std::cout << "Aircrafts was found successfully." << std::endl;
-
-      for (int i : flightsIds) {
-        std::cout << "Flight ID: " << i << std::endl;
-      }
-
-    } else {
-      std::cerr << "Failed to get all flights" << std::endl;
+      std::cerr << "Failed to find hotels by name." << std::endl;
     }
 
     dbConnector.disconnect();

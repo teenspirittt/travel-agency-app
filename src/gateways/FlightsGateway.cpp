@@ -18,22 +18,14 @@ bool FlightsGateway::insertFlight(const std::string &flightNumber,
       std::to_string(aircraftId) + ", '" + flightClass + "', " +
       std::to_string(availableSeats) + ", " + std::to_string(carrierId) + ")";
 
-  if (sqlExecuter->executeSQL(query)) {
-    return true;
-  } else {
-    return false;
-  }
+  return sqlExecuter->executeSQL(query);
 }
 
 bool FlightsGateway::deleteFlight(int flightId) {
   std::string query =
       "DELETE FROM Flights WHERE id = " + std::to_string(flightId);
 
-  if (sqlExecuter->executeSQL(query)) {
-    return true;
-  } else {
-    return false;
-  }
+  return sqlExecuter->executeSQL(query);
 }
 
 bool FlightsGateway::getFlight(int flightId, std::string &flightNumber,
@@ -97,11 +89,7 @@ bool FlightsGateway::updateFlight(int flightId, const std::string &flightNumber,
                       ", carrier_id = " + std::to_string(carrierId) +
                       " WHERE id = " + std::to_string(flightId);
 
-  if (sqlExecuter->executeSQL(query)) {
-    return true;
-  } else {
-    return false;
-  }
+  return sqlExecuter->executeSQL(query);
 }
 
 bool FlightsGateway::findFlightsByNumber(const std::string &flightNumber,
