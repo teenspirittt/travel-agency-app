@@ -2,6 +2,7 @@
 
 #include "./gateways/AircraftGateway.h"
 #include "./gateways/CarrierGateway.h"
+#include "./gateways/FlightsGateway.h"
 #include "./models/Aircraft.h"
 #include "./utils/DataBaseConnector.h"
 #include "./utils/DataBaseInitializer.h"
@@ -93,7 +94,7 @@ int main() {
     } else {
       std::cerr << "Failed to find aircraft." << std::endl;
     }
-
+    std::cout << std::endl;
     CarrierGateway carrierGateway;
 
     if (carrierGateway.insertCarrier("Emirates")) {
@@ -130,6 +131,76 @@ int main() {
       }
     } else {
       std::cerr << "Failed to get all carriers." << std::endl;
+    }
+    std::cout << std::endl;
+
+    FlightsGateway flightsGateway;
+
+    if (flightsGateway.insertFlight("F123", "2023-10-15 08:00:00", 9, "Economy",
+                                    200, 1)) {
+      std::cout << "Flight inserted successfully." << std::endl;
+    } else {
+      std::cerr << "Failed to insert flight." << std::endl;
+    }
+
+    std::string flightNumber, departureDate, flightClass;
+    int aircraftId, availableSeats, carrierIdF;
+    if (flightsGateway.getFlight(1, flightNumber, departureDate, aircraftId,
+                                 flightClass, availableSeats, carrierIdF)) {
+      std::cout << "Flight found successfully." << std::endl;
+      std::cout << "Flight Number: " << flightNumber << std::endl;
+      std::cout << "Departure Date: " << departureDate << std::endl;
+      std::cout << "Aircraft ID: " << aircraftId << std::endl;
+      std::cout << "Flight Class: " << flightClass << std::endl;
+      std::cout << "Available Seats: " << availableSeats << std::endl;
+      std::cout << "Carrier ID: " << carrierIdF << std::endl;
+    } else {
+      std::cerr << "Failed to find flight." << std::endl;
+    }
+
+    if (flightsGateway.updateFlight(1, "F124", "2023-10-16 09:00:00", 24,
+                                    "Business", 180, 2)) {
+      std::cout << "Flight updated successfully." << std::endl;
+    } else {
+      std::cerr << "Failed to update flight." << std::endl;
+    }
+
+    if (flightsGateway.deleteFlight(4)) {
+      std::cout << "Flight deleted successfully." << std::endl;
+    } else {
+      std::cerr << "Failed to delete Flight." << std::endl;
+    }
+
+    std::vector<int> matchingFlightIds;
+    if (flightsGateway.findFlightsByNumber("F124", matchingFlightIds)) {
+      std::cout << "Flights by number were found successfully." << std::endl;
+      for (int flightId : matchingFlightIds) {
+        std::cout << "Matching Flight ID: " << flightId << std::endl;
+      }
+    } else {
+      std::cerr << "Failed to find flights by number." << std::endl;
+    }
+
+    std::vector<int> matchingFlightIdsByAircraft;
+    if (flightsGateway.findFlightsByAircraft(24, matchingFlightIdsByAircraft)) {
+      std::cout << "Flights by aircraft were found successfully." << std::endl;
+      for (int flightId : matchingFlightIdsByAircraft) {
+        std::cout << "Matching Flight ID: " << flightId << std::endl;
+      }
+    } else {
+      std::cerr << "Failed to find flights by aircraft." << std::endl;
+    }
+
+    std::vector<int> flightsIds;
+    if (flightsGateway.getAllFlights(flightsIds)) {
+      std::cout << "Aircrafts was found successfully." << std::endl;
+
+      for (int i : flightsIds) {
+        std::cout << "Flight ID: " << i << std::endl;
+      }
+
+    } else {
+      std::cerr << "Failed to get all flights" << std::endl;
     }
 
     dbConnector.disconnect();
