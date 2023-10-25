@@ -10,19 +10,23 @@
 
 class DataBaseConnector {
  public:
-  DataBaseConnector();
-  ~DataBaseConnector();
+   static DataBaseConnector& getInstance() {
+    static DataBaseConnector instance;
+    return instance;
+  }
 
   bool connect();
   void disconnect();
   SQLHDBC getConnection();
 
   bool readConfigFile(const std::string& configFile);
-  SQLHENV getHDBC() { return hdbc; }
+  SQLHENV getHDBC() { return henv; }
 
  private:
   SQLHENV henv;
   SQLHDBC hdbc;
+  DataBaseConnector();
+  ~DataBaseConnector();
 
   std::string dsn;
   std::string dbname;

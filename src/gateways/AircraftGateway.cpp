@@ -1,190 +1,65 @@
 #include "AircraftGateway.h"
 
-AircraftGateway::AircraftGateway(SQLHDBC dbc) : hdbc(dbc) {}
+AircraftGateway::AircraftGateway() {
+  dbConnector = &DataBaseConnector::getInstance();
+}
 
 bool AircraftGateway::insertAircraft(const std::string &aircraftType,
                                      int carrierId,
                                      const std::string &manufacturer,
                                      int capacity) {
-  SQLHSTMT hstmt;
-  SQLRETURN ret;
-
   std::string query =
-      "INSERT INTO aircraft (aircraft_type, carrier_id, manufacturer, "
-      "capacity) VALUES (?, ?, ?, ?)";
-
-  ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    return false;
-  }
-
-  ret = SQLPrepare(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  SQLCHAR aircraftTypeParam[256];
-  SQLLEN aircraftTypeInd = SQL_NTS;
-  std::string aircraftTypeStr = aircraftType;
-  strcpy((char *)aircraftTypeParam, aircraftTypeStr.c_str());
-
-  ret = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR,
-                         256, 0, aircraftTypeParam, 0, &aircraftTypeInd);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0,
-                         0, &carrierId, 0, NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  SQLCHAR manufacturerParam[256];
-  SQLLEN manufacturerInd = SQL_NTS;
-  std::string manufacturerStr = manufacturer;
-  strcpy((char *)manufacturerParam, manufacturerStr.c_str());
-
-  ret = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR,
-                         256, 0, manufacturerParam, 0, &manufacturerInd);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindParameter(hstmt, 4, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0,
-                         0, &capacity, 0, NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLExecute(hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    return false;
-  }
-
-  return true;
+      "INSERT INTO Aircraft (aircraft_type, carrier_id, manufacturer, "
+      "capacity) "
+      "VALUES ('" +
+      aircraftType + "', " + std::to_string(carrierId) + ", '" + manufacturer +
+      "', " + std::to_string(capacity) + ")";
+  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
+  return sqlExecuter.executeSQL(query);
 }
 
 bool AircraftGateway::deleteAircraft(int aircraftId) {
-  SQLHSTMT hstmt;
-  SQLRETURN ret;
-
-  std::string query = "DELETE FROM Aircraft WHERE id = ?";
-
-  ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    return false;
-  }
-
-  ret = SQLPrepare(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0,
-                         0, &aircraftId, 0, NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLExecute(hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    return false;
-  }
-
-  return true;
+  std::string query =
+      "DELETE FROM Aircraft WHERE id = " + std::to_string(aircraftId);
+  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
+  return sqlExecuter.executeSQL(query);
 }
 
 bool AircraftGateway::getAircraft(int aircraftId, std::string &aircraftType,
                                   int &carrierId, std::string &manufacturer,
                                   int &capacity) {
-  SQLHSTMT hstmt;
-  SQLRETURN ret;
-
   std::string query =
       "SELECT aircraft_type, carrier_id, manufacturer, capacity FROM Aircraft "
-      "WHERE id = ?";
+      "WHERE id = " +
+      std::to_string(aircraftId);
+  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
 
-  ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    return false;
+  SQLHSTMT hstmt;
+
+  sqlExecuter.executeSQLWithResults(query, hstmt);
+  if (hstmt) {
+    SQLRETURN ret = SQLFetch(hstmt);
+    if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+      SQLLEN aircraftTypeLength, manufacturerLength;
+      char aircraftTypeBuffer[256], manufacturerBuffer[256];
+
+      ret = SQLGetData(hstmt, 1, SQL_C_CHAR, aircraftTypeBuffer,
+                       sizeof(aircraftTypeBuffer), &aircraftTypeLength);
+      ret = SQLGetData(hstmt, 2, SQL_C_LONG, &carrierId, 0, NULL);
+      ret = SQLGetData(hstmt, 3, SQL_C_CHAR, manufacturerBuffer,
+                       sizeof(manufacturerBuffer), &manufacturerLength);
+      ret = SQLGetData(hstmt, 4, SQL_C_LONG, &capacity, 0, NULL);
+
+      aircraftType = aircraftTypeBuffer;
+      manufacturer = manufacturerBuffer;
+
+      SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+      return true;
+    } else {
+      SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    }
   }
-
-  ret = SQLPrepare(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0,
-                         0, &aircraftId, 0, NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLExecute(hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindCol(hstmt, 1, SQL_C_CHAR, &aircraftType, sizeof(aircraftType),
-                   NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindCol(hstmt, 2, SQL_C_LONG, &carrierId, sizeof(carrierId), NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindCol(hstmt, 3, SQL_C_CHAR, &manufacturer, sizeof(manufacturer),
-                   NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindCol(hstmt, 4, SQL_C_LONG, &capacity, sizeof(capacity), NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLFetch(hstmt);
-  if (ret == SQL_NO_DATA) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;  // Не найдено записей с указанным ID
-  } else if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-  return true;
+  return false;
 }
 
 bool AircraftGateway::updateAircraft(int aircraftId,
@@ -192,230 +67,94 @@ bool AircraftGateway::updateAircraft(int aircraftId,
                                      int carrierId,
                                      const std::string &manufacturer,
                                      int capacity) {
-  SQLHSTMT hstmt;
-  SQLRETURN ret;
+  std::string query = "UPDATE Aircraft SET aircraft_type = '" + aircraftType +
+                      "', carrier_id = " + std::to_string(carrierId) +
+                      ", manufacturer = '" + manufacturer +
+                      "', capacity = " + std::to_string(capacity) +
+                      " WHERE id = " + std::to_string(aircraftId);
 
-  std::string query =
-      "UPDATE Aircraft SET aircraft_type = ?, carrier_id = ?, manufacturer = "
-      "?, capacity = ? WHERE id = ?";
+  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
 
-  ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    return false;
-  }
-
-  ret = SQLPrepare(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 0,
-                         0, (SQLPOINTER)aircraftType.c_str(), 0, NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindParameter(hstmt, 2, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0,
-                         0, &carrierId, 0, NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindParameter(hstmt, 3, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 0,
-                         0, (SQLPOINTER)manufacturer.c_str(), 0, NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindParameter(hstmt, 4, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0,
-                         0, &capacity, 0, NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindParameter(hstmt, 5, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0,
-                         0, &aircraftId, 0, NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLExecute(hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-  return true;
-}
-
-bool AircraftGateway::getAllAircraft(std::vector<int> &aircraftIds) {
-  SQLHSTMT hstmt;
-  SQLRETURN ret;
-
-  std::string query = "SELECT id FROM Aircraft";
-
-  ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    return false;
-  }
-
-  ret = SQLPrepare(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLExecute(hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  SQLINTEGER aircraftId;
-  SQLLEN indicator;
-
-  while ((ret = SQLFetch(hstmt)) != SQL_NO_DATA) {
-    if (ret == SQL_ERROR || ret == SQL_SUCCESS_WITH_INFO) {
-      SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-      return false;
-    }
-
-    ret = SQLGetData(hstmt, 1, SQL_C_LONG, &aircraftId, 0, &indicator);
-    if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-      SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-      return false;
-    }
-
-    if (indicator == SQL_NULL_DATA) {
-      continue;
-    }
-
-    aircraftIds.push_back(aircraftId);
-  }
-
-  SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-  return true;
+  return sqlExecuter.executeSQL(query);
 }
 
 bool AircraftGateway::findAircraftByType(
     const std::string &aircraftType, std::vector<int> &matchingAircraftIds) {
+  std::string query =
+      "SELECT id FROM Aircraft WHERE aircraft_type = '" + aircraftType + "'";
+
+  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
+
   SQLHSTMT hstmt;
-  SQLRETURN ret;
+  if (sqlExecuter.executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret;
 
-  std::string query = "SELECT id FROM Aircraft WHERE aircraft_type = ?";
-
-  ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    return false;
-  }
-
-  ret = SQLPrepare(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+    while ((ret = SQLFetch(hstmt)) == SQL_SUCCESS ||
+           ret == SQL_SUCCESS_WITH_INFO) {
+      int aircraftId;
+      ret = SQLGetData(hstmt, 1, SQL_C_LONG, &aircraftId, 0, NULL);
+      if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+        matchingAircraftIds.push_back(aircraftId);
+      }
+    }
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
+    return !matchingAircraftIds.empty();
   }
+  return false;
+}
 
-  ret = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 0,
-                         0, (SQLPOINTER)aircraftType.c_str(), 0, NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
+bool AircraftGateway::getAllAircraft(std::vector<int> &aircraftIds) {
+  std::string query = "SELECT id FROM Aircraft";
 
-  ret = SQLExecute(hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
+  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
 
-  SQLINTEGER aircraftId;
-  SQLLEN indicator;
+  SQLHSTMT hstmt;
+  if (sqlExecuter.executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret;
 
-  while ((ret = SQLFetch(hstmt)) != SQL_NO_DATA) {
-    if (ret == SQL_ERROR || ret == SQL_SUCCESS_WITH_INFO) {
-      SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-      return false;
+    while ((ret = SQLFetch(hstmt)) == SQL_SUCCESS ||
+           ret == SQL_SUCCESS_WITH_INFO) {
+      int aircraftId;
+      ret = SQLGetData(hstmt, 1, SQL_C_LONG, &aircraftId, 0, NULL);
+      if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+        aircraftIds.push_back(aircraftId);
+      }
     }
 
-    ret = SQLGetData(hstmt, 1, SQL_C_LONG, &aircraftId, 0, &indicator);
-    if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-      SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-      return false;
-    }
-
-    if (indicator == SQL_NULL_DATA) {
-      // Нулевые данные
-      continue;
-    }
-
-    matchingAircraftIds.push_back(aircraftId);
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    return !aircraftIds.empty();
   }
 
-  SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-  return true;
+  std::cout << "Failed to execute SQL or no aircraft found." << std::endl;
+  return false;
 }
 
 bool AircraftGateway::findAircraftByCarrier(
     int carrierId, std::vector<int> &matchingAircraftIds) {
+  std::string query =
+      "SELECT id FROM Aircraft WHERE carrier_id = " + std::to_string(carrierId);
+
+  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
+
   SQLHSTMT hstmt;
-  SQLRETURN ret;
+  if (sqlExecuter.executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret;
 
-  std::string query = "SELECT id FROM Aircraft WHERE carrier_id = ?";
-
-  ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    return false;
-  }
-
-  ret = SQLPrepare(hstmt, (SQLCHAR *)query.c_str(), SQL_NTS);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0,
-                         0, &carrierId, 0, NULL);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  ret = SQLExecute(hstmt);
-  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return false;
-  }
-
-  SQLINTEGER aircraftId;
-  SQLLEN indicator;
-
-  while ((ret = SQLFetch(hstmt)) != SQL_NO_DATA) {
-    if (ret == SQL_ERROR || ret == SQL_SUCCESS_WITH_INFO) {
-      SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-      return false;
+    while ((ret = SQLFetch(hstmt)) == SQL_SUCCESS ||
+           ret == SQL_SUCCESS_WITH_INFO) {
+      int aircraftId;
+      ret = SQLGetData(hstmt, 1, SQL_C_LONG, &aircraftId, 0, NULL);
+      if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+        matchingAircraftIds.push_back(aircraftId);
+      }
     }
 
-    ret = SQLGetData(hstmt, 1, SQL_C_LONG, &aircraftId, 0, &indicator);
-    if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-      SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-      return false;
-    }
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
 
-    if (indicator == SQL_NULL_DATA) {
-      // Нулевые данные
-      continue;
-    }
-
-    matchingAircraftIds.push_back(aircraftId);
+    return !matchingAircraftIds.empty();
   }
 
-  SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-  return true;
+  std::cout << "Failed to execute SQL or no matching aircraft found."
+            << std::endl;
+  return false;
 }

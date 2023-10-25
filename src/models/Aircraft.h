@@ -13,6 +13,8 @@ class Aircraft {
         manufacturer(manufacturer),
         capacity(capacity) {}
 
+  Aircraft(int id) : id(id) {}
+
   int getId() const { return id; }
   std::string getAircraftType() const { return aircraftType; }
   int getCarrierId() const { return carrierId; }
