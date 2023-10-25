@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "./gateways/AircraftGateway.h"
+#include "./gateways/CarrierGateway.h"
 #include "./models/Aircraft.h"
 #include "./utils/DataBaseConnector.h"
 #include "./utils/DataBaseInitializer.h"
@@ -91,6 +92,44 @@ int main() {
       }
     } else {
       std::cerr << "Failed to find aircraft." << std::endl;
+    }
+
+    CarrierGateway carrierGateway;
+
+    if (carrierGateway.insertCarrier("Emirates")) {
+      std::cout << "Carrier inserted successfully." << std::endl;
+    } else {
+      std::cerr << "Failed to insert carrier." << std::endl;
+    }
+
+    if (carrierGateway.deleteCarrier(1)) {
+      std::cout << "Carrier deleted successfully." << std::endl;
+    } else {
+      std::cerr << "Failed to delete carrier." << std::endl;
+    }
+
+    std::string carrierName;
+    if (carrierGateway.getCarrier(12, carrierName)) {
+      std::cout << "Carrier get successfully." << std::endl;
+      std::cout << "Carrier Name: " << carrierName << std::endl;
+    } else {
+      std::cerr << "Failed to get carrier." << std::endl;
+    }
+
+    if (carrierGateway.updateCarrier(12, "Qatar Airways")) {
+      std::cout << "Carrier updated successfully." << std::endl;
+    } else {
+      std::cerr << "Failed to update carrier." << std::endl;
+    }
+
+    std::vector<int> carrierIds;
+    if (carrierGateway.getAllCarriers(carrierIds)) {
+      std::cout << "Carriers were found successfully." << std::endl;
+      for (int carrierId : carrierIds) {
+        std::cout << "Carrier ID: " << carrierId << std::endl;
+      }
+    } else {
+      std::cerr << "Failed to get all carriers." << std::endl;
     }
 
     dbConnector.disconnect();
