@@ -6,13 +6,12 @@
 class Clients {
  public:
   Clients(int id, const std::string& fullName, const std::string& phone,
-          const std::string& orderDate, int routeId,
-          const std::string& classType, const std::string& seat)
+          const std::string& orderDate, const std::string& classType,
+          const std::string& seat)
       : id(id),
         fullName(fullName),
         phone(phone),
         orderDate(orderDate),
-        routeId(routeId),
         classType(classType),
         seat(seat) {}
 
@@ -20,7 +19,6 @@ class Clients {
   std::string getFullName() const { return fullName; }
   std::string getPhone() const { return phone; }
   std::string getOrderDate() const { return orderDate; }
-  int getRouteId() const { return routeId; }
   std::string getClassType() const { return classType; }
   std::string getSeat() const { return seat; }
 
@@ -30,7 +28,6 @@ class Clients {
   void setOrderDate(const std::string& orderDate) {
     this->orderDate = orderDate;
   }
-  void setRouteId(int routeId) { this->routeId = routeId; }
   void setClassType(const std::string& classType) {
     this->classType = classType;
   }
@@ -41,7 +38,6 @@ class Clients {
   std::string fullName;
   std::string phone;
   std::string orderDate;
-  int routeId;
   std::string classType;
   std::string seat;
 };

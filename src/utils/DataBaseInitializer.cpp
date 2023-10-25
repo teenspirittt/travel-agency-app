@@ -138,7 +138,6 @@ bool DataBaseInitializer::createTables() {
       "full_name varchar(255) NOT NULL,"
       "phone varchar(20) NOT NULL,"
       "order_date timestamp NOT NULL,"
-      "route_id int,"
       "class varchar(50),"
       "seat varchar(10)"
       ");";
@@ -209,6 +208,12 @@ bool DataBaseInitializer::createTables() {
   }
 
   ret = SQLExecDirect(hstmt, (SQLCHAR *)createRouteTable.c_str(), SQL_NTS);
+  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    return false;
+  }
+
+  ret = SQLExecDirect(hstmt, (SQLCHAR *)createClientRoute.c_str(), SQL_NTS);
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return false;
