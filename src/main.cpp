@@ -3,6 +3,7 @@
 #include "./gateways/AircraftGateway.h"
 #include "./gateways/CarrierGateway.h"
 #include "./gateways/ClientGateway.h"
+#include "./gateways/EmployeeGateway.h"
 #include "./gateways/EmployeeTransfers.h"
 #include "./gateways/FlightsGateway.h"
 #include "./gateways/HotelGateway.h"
@@ -28,76 +29,60 @@ int main() {
       std::cout << "Init database error";
     }
 
-    EmployeeTransfers employeeTransfers;
+    EmployeeGateway employeeGateway;
 
-    // Проверка вставки записи о переводе
-    if (employeeTransfers.insertTransfer(1, "Manager", "Promotion", "123456")) {
-      std::cout << "Transfer inserted successfully." << std::endl;
+    // Вставляем нового сотрудника
+    if (employeeGateway.insertEmployee("John Doe", "123 Main St", "1990-01-15",
+                                       "Manager", 55000.0)) {
+      std::cout << "Employee inserted successfully." << std::endl;
     } else {
-      std::cerr << "Failed to insert transfer." << std::endl;
+      std::cerr << "Failed to insert employee." << std::endl;
     }
 
-    // Проверка удаления записи о переводе
-    if (employeeTransfers.deleteTransfer(3)) {
-      std::cout << "Transfer deleted successfully." << std::endl;
+    // Удаление сотрудника по ID (замените 1 на действительный ID)
+    if (employeeGateway.deleteEmployee(3)) {
+      std::cout << "Employee deleted successfully." << std::endl;
     } else {
-      std::cerr << "Failed to delete transfer." << std::endl;
+      std::cerr << "Failed to delete employee." << std::endl;
     }
 
-    // Проверка обновления записи о переводе
-    if (employeeTransfers.updateTransfer(2, 2, "Supervisor", "New Assignment",
-                                         "654321")) {
-      std::cout << "Transfer updated successfully." << std::endl;
+    std::string fullName, address, dateOfBirth, position;
+    double salary;
+
+    // Получение данных о сотруднике (замените 2 на действительный ID)
+    if (employeeGateway.getEmployee(2, fullName, address, dateOfBirth, position,
+                                    salary)) {
+      std::cout << "Employee get successfully." << std::endl;
+      std::cout << "Full Name: " << fullName << std::endl;
+      std::cout << "Address: " << address << std::endl;
+      std::cout << "Date of Birth: " << dateOfBirth << std::endl;
+      std::cout << "Position: " << position << std::endl;
+      std::cout << "Salary: " << salary << std::endl;
     } else {
-      std::cerr << "Failed to update transfer." << std::endl;
+      std::cerr << "Failed to get employee." << std::endl;
     }
 
-    // Проверка получения всех записей о переводах
-    std::vector<int> allTransferIds;
-    if (employeeTransfers.getAllTransfers(allTransferIds)) {
-      std::cout << "All transfers retrieved successfully:" << std::endl;
-      for (int id : allTransferIds) {
-        std::cout << "Transfer ID: " << id << std::endl;
+    // Обновление данных о сотруднике (замените 3 на действительный ID)
+    if (employeeGateway.updateEmployee(13, "Alice Smith", "456 Elm St",
+                                       "1988-06-20", "Supervisor", 60000.0)) {
+      std::cout << "Employee updated successfully." << std::endl;
+    } else {
+      std::cerr << "Failed to update employee." << std::endl;
+    }
+
+    std::vector<int> matchingEmployeeIds;
+
+    // Поиск сотрудников по должности
+    if (employeeGateway.findEmployeesByPosition("Manager",
+                                                matchingEmployeeIds)) {
+      std::cout
+          << "Employees with the position 'Manager' were found successfully."
+          << std::endl;
+      for (int employeeId : matchingEmployeeIds) {
+        std::cout << "Matching Employee ID: " << employeeId << std::endl;
       }
     } else {
-      std::cerr << "Failed to get all transfers." << std::endl;
-    }
-
-    int transferId = 6;  // Замените на существующий transferId
-    int employeeId;
-    std::string newPosition;
-    std::string transferReason;
-    std::string orderNumber;
-
-    // Вызываем метод getTransfer
-    if (employeeTransfers.getTransfer(transferId, employeeId, newPosition,
-                                      transferReason, orderNumber)) {
-      // Метод вернул true, что означает успешное получение данных о переводе
-      std::cout << "good!  get transfer " << std::endl;
-      // Теперь вы можете вывести или использовать полученные данные
-      std::cout << "Transfer ID: " << transferId << std::endl;
-      std::cout << "Employee ID: " << employeeId << std::endl;
-      std::cout << "New Position: " << newPosition << std::endl;
-      std::cout << "Transfer Reason: " << transferReason << std::endl;
-      std::cout << "Order Number: " << orderNumber << std::endl;
-    } else {
-      // Метод вернул false, что означает, что данные о переводе не были найдены
-      std::cerr << "Failed to get transfer with ID " << transferId << std::endl;
-    }
-
-    // Замените на реальный идентификатор.
-
-    std::vector<int> matchingTransferIds;
-
-    if (employeeTransfers.findTransfersByEmployee(1, matchingTransferIds)) {
-      std::cout << "Transfers found for employee ID " << employeeId << ":"
-                << std::endl;
-      for (int transferId : matchingTransferIds) {
-        std::cout << "Matching Transfer ID: " << transferId << std::endl;
-      }
-    } else {
-      std::cerr << "No transfers found for employee ID " << employeeId
-                << std::endl;
+      std::cerr << "Failed to find employees by position." << std::endl;
     }
 
     dbConnector.disconnect();
