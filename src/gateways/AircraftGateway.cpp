@@ -103,26 +103,39 @@ bool AircraftGateway::findAircraftByType(
   return false;
 }
 
-bool AircraftGateway::getAllAircraft(std::vector<int> &aircraftIds) {
-  std::string query = "SELECT id FROM Aircraft";
-
-  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
-
+bool AircraftGateway::getAllAircraft(
+    std::vector<std::tuple<int, std::string, int, std::string, int>>
+        &aircraftData) {
+  std::string query =
+      "SELECT id, aircraft_type, carrier_id, manufacturer, capacity FROM "
+      "Aircraft";
   SQLHSTMT hstmt;
-  if (sqlExecuter.executeSQLWithResults(query, hstmt)) {
-    SQLRETURN ret;
 
-    while ((ret = SQLFetch(hstmt)) == SQL_SUCCESS ||
-           ret == SQL_SUCCESS_WITH_INFO) {
-      int aircraftId;
-      ret = SQLGetData(hstmt, 1, SQL_C_LONG, &aircraftId, 0, NULL);
+  if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret = SQL_SUCCESS;
+    while (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+      int id, carrierId, capacity;
+      char aircraftTypeBuffer[256];
+      char manufacturerBuffer[256];
+
+      ret = SQLFetch(hstmt);
       if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
-        aircraftIds.push_back(aircraftId);
+        ret = SQLGetData(hstmt, 1, SQL_C_LONG, &id, 0, NULL);
+        ret = SQLGetData(hstmt, 2, SQL_C_CHAR, aircraftTypeBuffer,
+                         sizeof(aircraftTypeBuffer), NULL);
+        ret = SQLGetData(hstmt, 3, SQL_C_LONG, &carrierId, 0, NULL);
+        ret = SQLGetData(hstmt, 4, SQL_C_CHAR, manufacturerBuffer,
+                         sizeof(manufacturerBuffer), NULL);
+        ret = SQLGetData(hstmt, 5, SQL_C_LONG, &capacity, 0, NULL);
+        std::string aircraftType(aircraftTypeBuffer);
+        std::string manufacturer(manufacturerBuffer);
+        aircraftData.emplace_back(id, aircraftType, carrierId, manufacturer,
+                                  capacity);
       }
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return !aircraftIds.empty();
+    return !aircraftData.empty();
   }
 
   std::cout << "Failed to execute SQL or no aircraft found." << std::endl;

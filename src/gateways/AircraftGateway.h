@@ -25,7 +25,9 @@ class AircraftGateway {
   bool updateAircraft(int aircraftId, const std::string &aircraftType,
                       int carrierId, const std::string &manufacturer,
                       int capacity);
-  bool getAllAircraft(std::vector<int> &aircraftIds);
+  bool getAllAircraft(
+      std::vector<std::tuple<int, std::string, int, std::string, int>>
+          &aircraftData);
 
   bool findAircraftByType(const std::string &aircraftType,
                           std::vector<int> &matchingAircraftIds);
