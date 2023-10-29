@@ -48,24 +48,62 @@ bool RouteGateway::updateRoute(int routeId, const std::string &name,
   return sqlExecuter->executeSQL(query);
 }
 
-bool RouteGateway::getAllRoutes(std::vector<int> &routeIds) {
-  std::string query = "SELECT id FROM Route";
+bool RouteGateway::getAllRoutes(
+    std::vector<std::tuple<int, std::string, std::string, std::string, int, int,
+                           int, int, std::string, std::string>> &routeData) {
+  std::string query =
+      "SELECT id, name, country, city, duration, hotel_id, flight_id, "
+      "employee_id, "
+      "agency_representative_name, agency_representative_phone FROM Routes";
   SQLHSTMT hstmt;
 
   if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
     SQLRETURN ret = SQL_SUCCESS;
     while (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
-      int routeId;
-      ret = SQLGetData(hstmt, 1, SQL_C_LONG, &routeId, 0, NULL);
+      int id, duration, hotel_id, flight_id, employee_id;
+      char nameBuffer[256];
+      char countryBuffer[256];
+      char cityBuffer[256];
+      char agency_representative_nameBuffer[256];
+      char agency_representative_phoneBuffer[256];
+
+      ret = SQLFetch(hstmt);
       if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
-        routeIds.push_back(routeId);
+        ret = SQLGetData(hstmt, 1, SQL_C_LONG, &id, 0, NULL);
+        ret = SQLGetData(hstmt, 2, SQL_C_CHAR, nameBuffer, sizeof(nameBuffer),
+                         NULL);
+        ret = SQLGetData(hstmt, 3, SQL_C_CHAR, countryBuffer,
+                         sizeof(countryBuffer), NULL);
+        ret = SQLGetData(hstmt, 4, SQL_C_CHAR, cityBuffer, sizeof(cityBuffer),
+                         NULL);
+        ret = SQLGetData(hstmt, 5, SQL_C_LONG, &duration, 0, NULL);
+        ret = SQLGetData(hstmt, 6, SQL_C_LONG, &hotel_id, 0, NULL);
+        ret = SQLGetData(hstmt, 7, SQL_C_LONG, &flight_id, 0, NULL);
+        ret = SQLGetData(hstmt, 8, SQL_C_LONG, &employee_id, 0, NULL);
+        ret = SQLGetData(hstmt, 9, SQL_C_CHAR, agency_representative_nameBuffer,
+                         sizeof(agency_representative_nameBuffer), NULL);
+        ret =
+            SQLGetData(hstmt, 10, SQL_C_CHAR, agency_representative_phoneBuffer,
+                       sizeof(agency_representative_phoneBuffer), NULL);
+
+        std::string name(nameBuffer);
+        std::string country(countryBuffer);
+        std::string city(cityBuffer);
+        std::string agency_representative_name(
+            agency_representative_nameBuffer);
+        std::string agency_representative_phone(
+            agency_representative_phoneBuffer);
+
+        routeData.emplace_back(
+            id, name, country, city, duration, hotel_id, flight_id, employee_id,
+            agency_representative_name, agency_representative_phone);
       }
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return !routeIds.empty();
+    return !routeData.empty();
   }
-  std::cerr << "Failed to execute SQL or no routes found." << std::endl;
+
   return false;
 }
 

@@ -115,3 +115,53 @@ bool EmployeeGateway::findEmployeesByPosition(
 
   return false;
 }
+
+bool EmployeeGateway::getAllEmployees(
+    std::vector<std::tuple<int, std::string, std::string, std::string,
+                           std::string, double>> &employeeData) {
+  std::string query =
+      "SELECT id, full_name, address, date_of_birth, position, salary FROM "
+      "Employees";
+  SQLHSTMT hstmt;
+
+  if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret = SQL_SUCCESS;
+    while (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+      int id;
+      char full_nameBuffer[256];
+      char addressBuffer[256];  // Изменено с 256 на 65536 для поддержки
+                                // текстового поля.
+      char date_of_birthBuffer[11];  // Изменено с 10 на 11, так как длина даты
+                                     // 10 символов (например, "yyyy-mm-dd").
+      char positionBuffer[256];
+      double salary;
+
+      ret = SQLFetch(hstmt);
+      if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+        ret = SQLGetData(hstmt, 1, SQL_C_LONG, &id, 0, NULL);
+        ret = SQLGetData(hstmt, 2, SQL_C_CHAR, full_nameBuffer,
+                         sizeof(full_nameBuffer), NULL);
+        ret = SQLGetData(hstmt, 3, SQL_C_CHAR, addressBuffer,
+                         sizeof(addressBuffer), NULL);
+        ret = SQLGetData(hstmt, 4, SQL_C_CHAR, date_of_birthBuffer,
+                         sizeof(date_of_birthBuffer), NULL);
+        ret = SQLGetData(hstmt, 5, SQL_C_CHAR, positionBuffer,
+                         sizeof(positionBuffer), NULL);
+        ret = SQLGetData(hstmt, 6, SQL_C_DOUBLE, &salary, 0, NULL);
+
+        std::string full_name(full_nameBuffer);
+        std::string address(addressBuffer);
+        std::string date_of_birth(date_of_birthBuffer);
+        std::string position(positionBuffer);
+
+        employeeData.emplace_back(id, full_name, address, date_of_birth,
+                                  position, salary);
+      }
+    }
+
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    return !employeeData.empty();
+  }
+
+  return false;
+}

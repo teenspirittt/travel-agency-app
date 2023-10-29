@@ -17,7 +17,7 @@ class CarrierGateway {
   bool deleteCarrier(int carrierId);
   bool getCarrier(int carrierId, std::string &name);
   bool updateCarrier(int carrierId, const std::string &name);
-  bool getAllCarriers(std::vector<int> &carrierIds);
+  bool getAllCarriers(std::vector<std::tuple<int, std::string>> &carrierData);
 
  private:
   DataBaseConnector *dbConnector;

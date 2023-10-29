@@ -23,7 +23,9 @@ class EmployeeTransfers {
                       const std::string &oldPosition,
                       const std::string &transferReason,
                       const std::string &orderNumber);
-  bool getAllTransfers(std::vector<int> &transferIds);
+  bool getAllTransfers(
+      std::vector<std::tuple<int, int, std::string, std::string, std::string,
+                             std::string>> &transferData);
   bool findTransfersByEmployee(int employeeId,
                                std::vector<int> &matchingTransferIds);
 

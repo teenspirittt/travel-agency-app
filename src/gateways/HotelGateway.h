@@ -21,7 +21,8 @@ class HotelGateway {
                 std::string &roomCategory);
   bool updateHotel(int hotelId, const std::string &name, int hotelClass,
                    const std::string &roomCategory);
-  bool getAllHotels(std::vector<int> &hotelIds);
+  bool getAllHotels(
+      std::vector<std::tuple<int, std::string, int, std::string>> &hotelData);
   bool findHotelsByName(const std::string &name,
                         std::vector<int> &matchingHotelIds);
 

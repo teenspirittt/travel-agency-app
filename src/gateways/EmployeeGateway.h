@@ -25,7 +25,9 @@ class EmployeeGateway {
                       const std::string &address,
                       const std::string &dateOfBirth,
                       const std::string &position, double salary);
-  bool getAllEmployees(std::vector<int> &employeeIds);
+  bool getAllEmployees(
+      std::vector<std::tuple<int, std::string, std::string, std::string,
+                             std::string, double>> &employeeData);
   bool findEmployeesByPosition(const std::string &position,
                                std::vector<int> &matchingEmployeeIds);
 

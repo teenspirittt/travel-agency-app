@@ -25,29 +25,53 @@ bool EmployeeTransfers::deleteTransfer(int transferId) {
 
   return sqlExecuter->executeSQL(query);
 }
-
-bool EmployeeTransfers::getAllTransfers(std::vector<int> &transferIds) {
-  std::string query = "SELECT id FROM Employee_Transfers";
+bool EmployeeTransfers::getAllTransfers(
+    std::vector<std::tuple<int, int, std::string, std::string, std::string,
+                           std::string>> &transferData) {
+  std::string query =
+      "SELECT id, employee_id, old_position, transfer_reason, order_number, "
+      "order_date FROM Transfers";
   SQLHSTMT hstmt;
 
   if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
     SQLRETURN ret = SQL_SUCCESS;
     while (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
-      int transferId;
+      int id, employee_id;
+      char old_positionBuffer[256];
+      char transfer_reasonBuffer[65536];  // Изменено с 256 на 65536 для
+                                          // поддержки текстового поля.
+      char order_numberBuffer[51];  // Изменено с 50 на 51 для поддержки полей в
+                                    // 50 символов.
+      char order_dateBuffer[11];  // Изменено с 10 на 11, так как длина даты 10
+                                  // символов (например, "yyyy-mm-dd").
+
       ret = SQLFetch(hstmt);
       if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
-        ret = SQLGetData(hstmt, 1, SQL_C_LONG, &transferId, 0, NULL);
-        if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
-          transferIds.push_back(transferId);
-        }
+        ret = SQLGetData(hstmt, 1, SQL_C_LONG, &id, 0, NULL);
+        ret = SQLGetData(hstmt, 2, SQL_C_LONG, &employee_id, 0, NULL);
+        ret = SQLGetData(hstmt, 3, SQL_C_CHAR, old_positionBuffer,
+                         sizeof(old_positionBuffer), NULL);
+        ret = SQLGetData(hstmt, 4, SQL_C_CHAR, transfer_reasonBuffer,
+                         sizeof(transfer_reasonBuffer), NULL);
+        ret = SQLGetData(hstmt, 5, SQL_C_CHAR, order_numberBuffer,
+                         sizeof(order_numberBuffer), NULL);
+        ret = SQLGetData(hstmt, 6, SQL_C_CHAR, order_dateBuffer,
+                         sizeof(order_dateBuffer), NULL);
+
+        std::string old_position(old_positionBuffer);
+        std::string transfer_reason(transfer_reasonBuffer);
+        std::string order_number(order_numberBuffer);
+        std::string order_date(order_dateBuffer);
+
+        transferData.emplace_back(id, employee_id, old_position,
+                                  transfer_reason, order_number, order_date);
       }
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return !transferIds.empty();
+    return !transferData.empty();
   }
 
-  std::cerr << "Failed to get all employee transfers." << std::endl;
   return false;
 }
 

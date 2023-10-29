@@ -46,27 +46,31 @@ bool CarrierGateway::updateCarrier(int carrierId, const std::string &name) {
   return sqlExecuter->executeSQL(query);
 }
 
-bool CarrierGateway::getAllCarriers(std::vector<int> &carrierIds) {
-  std::string query = "SELECT id FROM carriers";
-
-  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
-
+bool CarrierGateway::getAllCarriers(
+    std::vector<std::tuple<int, std::string>> &carrierData) {
+  std::string query = "SELECT id, name FROM Carriers";
   SQLHSTMT hstmt;
-  if (sqlExecuter.executeSQLWithResults(query, hstmt)) {
-    SQLRETURN ret;
-    while ((ret = SQLFetch(hstmt)) == SQL_SUCCESS ||
-           ret == SQL_SUCCESS_WITH_INFO) {
-      int aircraftId;
-      ret = SQLGetData(hstmt, 1, SQL_C_LONG, &aircraftId, 0, NULL);
+
+  if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret = SQL_SUCCESS;
+    while (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+      int id;
+      char nameBuffer[256];
+
+      ret = SQLFetch(hstmt);
       if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
-        carrierIds.push_back(aircraftId);
+        ret = SQLGetData(hstmt, 1, SQL_C_LONG, &id, 0, NULL);
+        ret = SQLGetData(hstmt, 2, SQL_C_CHAR, nameBuffer, sizeof(nameBuffer),
+                         NULL);
+
+        std::string name(nameBuffer);
+        carrierData.emplace_back(id, name);
       }
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return !carrierIds.empty();
+    return !carrierData.empty();
   }
 
-  std::cout << "Failed to execute SQL or no carrier found." << std::endl;
   return false;
 }

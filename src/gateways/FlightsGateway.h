@@ -30,7 +30,9 @@ class FlightsGateway {
                     const std::string &flightClass, int availableSeats,
                     int carrierId);
 
-  bool getAllFlights(std::vector<int> &flightIds);
+  bool getAllFlights(
+      std::vector<std::tuple<int, std::string, std::string, int, std::string,
+                             int, int>> &flightData);
 
   bool findFlightsByNumber(const std::string &flightNumber,
                            std::vector<int> &matchingFlightIds);

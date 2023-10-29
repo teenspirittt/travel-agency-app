@@ -28,7 +28,9 @@ class ClientGateway {
                     const std::string &phone, const std::string &orderDate,
                     const std::string &clientClass, const std::string &seat);
 
-  bool getAllClients(std::vector<int> &clientIds);
+  bool getAllClients(
+      std::vector<std::tuple<int, std::string, std::string, std::string,
+                             std::string, std::string>> &clientData);
 
   bool findClientsByFullName(const std::string &fullName,
                              std::vector<int> &matchingClientIds);

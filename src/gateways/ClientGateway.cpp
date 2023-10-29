@@ -90,29 +90,52 @@ bool ClientGateway::updateClient(int clientId, const std::string &fullName,
   return sqlExecuter->executeSQL(query);
 }
 
-bool ClientGateway::getAllClients(std::vector<int> &clientIds) {
-  std::string query = "SELECT id FROM clients";
-
-  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
-
+bool ClientGateway::getAllClients(
+    std::vector<std::tuple<int, std::string, std::string, std::string,
+                           std::string, std::string>> &clientData) {
+  std::string query =
+      "SELECT id, full_name, phone, order_date, class, seat FROM Clients";
   SQLHSTMT hstmt;
-  if (sqlExecuter.executeSQLWithResults(query, hstmt)) {
-    SQLRETURN ret;
 
-    while ((ret = SQLFetch(hstmt)) == SQL_SUCCESS ||
-           ret == SQL_SUCCESS_WITH_INFO) {
-      int clientId;
-      ret = SQLGetData(hstmt, 1, SQL_C_LONG, &clientId, 0, NULL);
+  if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret = SQL_SUCCESS;
+    while (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+      int id;
+      char full_nameBuffer[256];
+      char phoneBuffer[20];
+      char order_dateBuffer[50];
+      char classBuffer[50];
+      char seatBuffer[10];
+
+      ret = SQLFetch(hstmt);
       if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
-        clientIds.push_back(clientId);
+        ret = SQLGetData(hstmt, 1, SQL_C_LONG, &id, 0, NULL);
+        ret = SQLGetData(hstmt, 2, SQL_C_CHAR, full_nameBuffer,
+                         sizeof(full_nameBuffer), NULL);
+        ret = SQLGetData(hstmt, 3, SQL_C_CHAR, phoneBuffer, sizeof(phoneBuffer),
+                         NULL);
+        ret = SQLGetData(hstmt, 4, SQL_C_CHAR, order_dateBuffer,
+                         sizeof(order_dateBuffer), NULL);
+        ret = SQLGetData(hstmt, 5, SQL_C_CHAR, classBuffer, sizeof(classBuffer),
+                         NULL);
+        ret = SQLGetData(hstmt, 6, SQL_C_CHAR, seatBuffer, sizeof(seatBuffer),
+                         NULL);
+
+        std::string full_name(full_nameBuffer);
+        std::string phone(phoneBuffer);
+        std::string order_date(order_dateBuffer);
+        std::string class_field(classBuffer);
+        std::string seat(seatBuffer);
+
+        clientData.emplace_back(id, full_name, phone, order_date, class_field,
+                                seat);
       }
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return !clientIds.empty();
+    return !clientData.empty();
   }
 
-  std::cout << "Failed to execute SQL or no flights found." << std::endl;
   return false;
 }
 

@@ -22,25 +22,36 @@ bool HotelGateway::deleteHotel(int hotelId) {
   return sqlExecuter->executeSQL(query);
 }
 
-bool HotelGateway::getAllHotels(std::vector<int> &hotelIds) {
-  std::string query = "SELECT id FROM Hotels";
-
+bool HotelGateway::getAllHotels(
+    std::vector<std::tuple<int, std::string, int, std::string>> &hotelData) {
+  std::string query = "SELECT id, name, class, room_category FROM Hotels";
   SQLHSTMT hstmt;
 
   if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
-    SQLRETURN ret;
+    SQLRETURN ret = SQL_SUCCESS;
+    while (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+      int id, hotel_class;
+      char nameBuffer[256];
+      char room_categoryBuffer[256];
 
-    while ((ret = SQLFetch(hstmt)) == SQL_SUCCESS ||
-           ret == SQL_SUCCESS_WITH_INFO) {
-      int hotelId;
-      ret = SQLGetData(hstmt, 1, SQL_C_LONG, &hotelId, 0, NULL);
+      ret = SQLFetch(hstmt);
       if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
-        hotelIds.push_back(hotelId);
+        ret = SQLGetData(hstmt, 1, SQL_C_LONG, &id, 0, NULL);
+        ret = SQLGetData(hstmt, 2, SQL_C_CHAR, nameBuffer, sizeof(nameBuffer),
+                         NULL);
+        ret = SQLGetData(hstmt, 3, SQL_C_LONG, &hotel_class, 0, NULL);
+        ret = SQLGetData(hstmt, 4, SQL_C_CHAR, room_categoryBuffer,
+                         sizeof(room_categoryBuffer), NULL);
+
+        std::string name(nameBuffer);
+        std::string room_category(room_categoryBuffer);
+
+        hotelData.emplace_back(id, name, hotel_class, room_category);
       }
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return !hotelIds.empty();
+    return !hotelData.empty();
   }
 
   return false;
