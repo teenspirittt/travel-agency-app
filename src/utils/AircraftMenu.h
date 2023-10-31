@@ -45,7 +45,7 @@ public:
                 default:
                     std::cout << "Invalid choice. Please try again.\n";
             }
-        } while (choice != 4);
+        } while (choice != 5);
     }
 
     void insertAircraft() {
@@ -191,8 +191,7 @@ public:
         std::cin >> newCarrierId;
 
 
-
-        for (Aircraft &aircraft : aircraftIdMapper->aircraftVector) {
+        for (Aircraft &aircraft: aircraftIdMapper->aircraftVector) {
             if (aircraft.getId() == aircraftIdMapper->getAbstractId(realAircraftId)) {
                 if (!newAircraftType.empty()) {
                     aircraft.setAircraftType(newAircraftType);
@@ -218,13 +217,13 @@ public:
             }
         }
 
-        if (aircraftGateway.updateAircraft(realAircraftId, newAircraftType, newCarrierId, newManufacturer, newCapacity)) {
+        if (aircraftGateway.updateAircraft(realAircraftId, newAircraftType, newCarrierId, newManufacturer,
+                                           newCapacity)) {
             std::cout << "Aircraft with abstract ID " << abstractId << " updated successfully.\n";
         } else {
             std::cerr << "Failed to update aircraft with abstract ID " << abstractId << ".\n";
         }
     }
-
 
 private:
     AircraftGateway &aircraftGateway;

@@ -190,5 +190,5 @@ int AircraftGateway::getLastInsertedId() {
   }
 
   std::cerr << "Failed to get the last inserted ID.\n";
-  return -1;  // Return -1 in case of failure
+  return -1;
 }

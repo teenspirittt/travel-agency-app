@@ -24,6 +24,8 @@ class CarrierGateway {
 
   bool getAllCarriers(std::vector<std::tuple<int, std::string>> &carrierData);
 
+  int getLastInsertedId();
+
  private:
   DataBaseConnector *dbConnector;
   SqlExecuter *sqlExecuter;
