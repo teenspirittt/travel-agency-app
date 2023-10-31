@@ -72,7 +72,6 @@ bool AircraftGateway::updateAircraft(int aircraftId,
                       ", manufacturer = '" + manufacturer +
                       "', capacity = " + std::to_string(capacity) +
                       " WHERE id = " + std::to_string(aircraftId);
-
   return sqlExecuter->executeSQL(query);
 }
 
@@ -167,4 +166,29 @@ bool AircraftGateway::findAircraftByCarrier(
   std::cout << "Failed to execute SQL or no matching aircraft found."
             << std::endl;
   return false;
+}
+
+int AircraftGateway::getLastInsertedId() {
+  SQLHSTMT hstmt;
+  std::string query = "SELECT last_value FROM aircraft_id_seq";
+
+  if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret = SQL_SUCCESS;
+    int lastInsertedId = -1;
+
+    ret = SQLFetch(hstmt);
+    if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+      SQLLEN idLength;
+      ret = SQLGetData(hstmt, 1, SQL_C_SLONG, &lastInsertedId, 0, &idLength);
+      if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+        SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+        return lastInsertedId;
+      }
+    }
+
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+  }
+
+  std::cerr << "Failed to get the last inserted ID.\n";
+  return -1;  // Return -1 in case of failure
 }

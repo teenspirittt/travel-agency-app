@@ -39,6 +39,8 @@ class AircraftGateway {
   bool findAircraftByCarrier(int carrierId,
                              std::vector<int> &matchingAircraftIds);
 
+  int getLastInsertedId();
+
  private:
   DataBaseConnector *dbConnector;
   SqlExecuter *sqlExecuter;

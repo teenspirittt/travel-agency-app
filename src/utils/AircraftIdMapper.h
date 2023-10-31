@@ -1,4 +1,5 @@
 #pragma once
+#include "../models/Aircraft.h"
 #include "IdMapper.h"
 
 class AircraftIdMapper : public IdMapper {
@@ -7,6 +8,8 @@ class AircraftIdMapper : public IdMapper {
     static AircraftIdMapper instance;
     return instance;
   }
+
+  std::vector<Aircraft> aircraftVector;
 
  private:
   AircraftIdMapper() = default;

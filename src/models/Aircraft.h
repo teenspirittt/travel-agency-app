@@ -5,8 +5,12 @@
 
 class Aircraft {
  public:
-  Aircraft(int id, const std::string& aircraftType, int carrierId,
-           const std::string& manufacturer, int capacity)
+    Aircraft() {
+
+    }
+
+    Aircraft(int id, const std::string& aircraftType, int carrierId,
+             const std::string& manufacturer, int capacity)
       : id(id),
         aircraftType(aircraftType),
         carrierId(carrierId),
