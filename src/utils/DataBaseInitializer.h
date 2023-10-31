@@ -7,7 +7,7 @@
 
 class DataBaseInitializer {
  public:
-  DataBaseInitializer(DataBaseConnector& connector);
+  explicit DataBaseInitializer(DataBaseConnector& connector);
 
   bool initializeDataBase();
 

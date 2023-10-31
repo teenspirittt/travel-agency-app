@@ -7,6 +7,7 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "../utils/DataBaseConnector.h"
@@ -15,8 +16,10 @@
 class AircraftGateway {
  public:
   AircraftGateway();
+
   bool insertAircraft(const std::string &aircraftType, int carrierId,
                       const std::string &manufacturer, int capacity);
+
   bool deleteAircraft(int aircraftId);
 
   bool getAircraft(int aircraftId, std::string &aircraftType, int &carrierId,
@@ -25,12 +28,14 @@ class AircraftGateway {
   bool updateAircraft(int aircraftId, const std::string &aircraftType,
                       int carrierId, const std::string &manufacturer,
                       int capacity);
+
   bool getAllAircraft(
       std::vector<std::tuple<int, std::string, int, std::string, int>>
           &aircraftData);
 
   bool findAircraftByType(const std::string &aircraftType,
                           std::vector<int> &matchingAircraftIds);
+
   bool findAircraftByCarrier(int carrierId,
                              std::vector<int> &matchingAircraftIds);
 

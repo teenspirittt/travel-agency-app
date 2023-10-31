@@ -1,7 +1,9 @@
+
 #include "AircraftGateway.h"
 
 AircraftGateway::AircraftGateway() {
   dbConnector = &DataBaseConnector::getInstance();
+  sqlExecuter = &SqlExecuter::getInstance();
 }
 
 bool AircraftGateway::insertAircraft(const std::string &aircraftType,
@@ -14,15 +16,14 @@ bool AircraftGateway::insertAircraft(const std::string &aircraftType,
       "VALUES ('" +
       aircraftType + "', " + std::to_string(carrierId) + ", '" + manufacturer +
       "', " + std::to_string(capacity) + ")";
-  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
-  return sqlExecuter.executeSQL(query);
+  return sqlExecuter->executeSQL(query);
 }
 
 bool AircraftGateway::deleteAircraft(int aircraftId) {
   std::string query =
       "DELETE FROM Aircraft WHERE id = " + std::to_string(aircraftId);
-  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
-  return sqlExecuter.executeSQL(query);
+
+  return sqlExecuter->executeSQL(query);
 }
 
 bool AircraftGateway::getAircraft(int aircraftId, std::string &aircraftType,
@@ -32,11 +33,10 @@ bool AircraftGateway::getAircraft(int aircraftId, std::string &aircraftType,
       "SELECT aircraft_type, carrier_id, manufacturer, capacity FROM Aircraft "
       "WHERE id = " +
       std::to_string(aircraftId);
-  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
 
   SQLHSTMT hstmt;
 
-  sqlExecuter.executeSQLWithResults(query, hstmt);
+  sqlExecuter->executeSQLWithResults(query, hstmt);
   if (hstmt) {
     SQLRETURN ret = SQLFetch(hstmt);
     if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
@@ -73,9 +73,7 @@ bool AircraftGateway::updateAircraft(int aircraftId,
                       "', capacity = " + std::to_string(capacity) +
                       " WHERE id = " + std::to_string(aircraftId);
 
-  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
-
-  return sqlExecuter.executeSQL(query);
+  return sqlExecuter->executeSQL(query);
 }
 
 bool AircraftGateway::findAircraftByType(
@@ -83,10 +81,8 @@ bool AircraftGateway::findAircraftByType(
   std::string query =
       "SELECT id FROM Aircraft WHERE aircraft_type = '" + aircraftType + "'";
 
-  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
-
   SQLHSTMT hstmt;
-  if (sqlExecuter.executeSQLWithResults(query, hstmt)) {
+  if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
     SQLRETURN ret;
 
     while ((ret = SQLFetch(hstmt)) == SQL_SUCCESS ||
@@ -120,15 +116,18 @@ bool AircraftGateway::getAllAircraft(
 
       ret = SQLFetch(hstmt);
       if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+        SQLLEN aircraftTypeLength, manufacturerLength;
         ret = SQLGetData(hstmt, 1, SQL_C_LONG, &id, 0, NULL);
         ret = SQLGetData(hstmt, 2, SQL_C_CHAR, aircraftTypeBuffer,
-                         sizeof(aircraftTypeBuffer), NULL);
+                         sizeof(aircraftTypeBuffer), &aircraftTypeLength);
         ret = SQLGetData(hstmt, 3, SQL_C_LONG, &carrierId, 0, NULL);
         ret = SQLGetData(hstmt, 4, SQL_C_CHAR, manufacturerBuffer,
-                         sizeof(manufacturerBuffer), NULL);
+                         sizeof(manufacturerBuffer), &manufacturerLength);
         ret = SQLGetData(hstmt, 5, SQL_C_LONG, &capacity, 0, NULL);
-        std::string aircraftType(aircraftTypeBuffer);
-        std::string manufacturer(manufacturerBuffer);
+
+        std::string aircraftType = aircraftTypeBuffer;
+        std::string manufacturer = manufacturerBuffer;
+
         aircraftData.emplace_back(id, aircraftType, carrierId, manufacturer,
                                   capacity);
       }
@@ -147,10 +146,8 @@ bool AircraftGateway::findAircraftByCarrier(
   std::string query =
       "SELECT id FROM Aircraft WHERE carrier_id = " + std::to_string(carrierId);
 
-  SqlExecuter &sqlExecuter = SqlExecuter::getInstance();
-
   SQLHSTMT hstmt;
-  if (sqlExecuter.executeSQLWithResults(query, hstmt)) {
+  if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
     SQLRETURN ret;
 
     while ((ret = SQLFetch(hstmt)) == SQL_SUCCESS ||
