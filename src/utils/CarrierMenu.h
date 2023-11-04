@@ -6,11 +6,11 @@
 
 class CarrierMenu {
 public:
-    CarrierMenu(CarrierGateway &cGateway) : carrierGateway(cGateway) {
+    explicit CarrierMenu(CarrierGateway &cGateway) : carrierGateway(cGateway) {
         carrierIdMapper = &CarrierIdMapper::getInstance();
     }
 
-    void displayMenu(){
+    void displayMenu() {
         int choice;
         do {
             std::cout << "\nCarrier Menu:\n";
@@ -44,7 +44,7 @@ public:
         } while (choice != 5);
     }
 
-    void insertCarrier()  {
+    void insertCarrier() {
         std::string name;
         std::cout << "Insert carrier name: (required string)\n";
         std::cin.ignore();
@@ -55,11 +55,12 @@ public:
 
             Carrier newCarrier(carrierIdMapper->generateNextAbstractId(), name);
             carrierIdMapper->carrierVector.push_back(newCarrier);
-            carrierIdMapper->addMapping(newCarrier.getId(), carrierGateway.getLastInsertedId());
+            carrierIdMapper->addMapping(newCarrier.getId(),
+                                        carrierGateway.getLastInsertedId());
         }
     }
 
-    void deleteCarrier(){
+    void deleteCarrier() {
         int abstractId;
         std::cout << "Insert ID to delete\n";
         std::cin >> abstractId;
@@ -73,16 +74,18 @@ public:
         }
 
         if (carrierGateway.deleteCarrier(carrierIdMapper->getRealId(abstractId))) {
-            std::cout << "Carrier with abstract ID " << abstractId << " deleted successfully.\n";
+            std::cout << "Carrier with abstract ID " << abstractId
+                      << " deleted successfully.\n";
         } else {
-            std::cerr << "Failed to delete carrier with abstract ID " << abstractId << ".\n";
+            std::cerr << "Failed to delete carrier with abstract ID " << abstractId
+                      << ".\n";
         }
     }
 
-    void viewAllCarriers(){
+    void viewAllCarriers() {
         std::cout << "\nAll Carriers:\n";
 
-        for (const Carrier &carrier : carrierIdMapper->carrierVector) {
+        for (const Carrier &carrier: carrierIdMapper->carrierVector) {
             int abstractId = carrier.getId();
             std::string name = carrier.getName();
 
@@ -92,14 +95,14 @@ public:
         }
     }
 
-
-    void updateCarrier(){
+    void updateCarrier() {
         int abstractId;
         std::cout << "Enter the ID of the carrier you want to update: ";
         std::cin >> abstractId;
 
         if (!carrierIdMapper->getRealId(abstractId)) {
-            std::cerr << "Carrier with abstract ID " << abstractId << " does not exist.\n";
+            std::cerr << "Carrier with abstract ID " << abstractId
+                      << " does not exist.\n";
             return;
         }
 
@@ -110,7 +113,7 @@ public:
         std::cin.ignore();
         std::getline(std::cin, newName);
 
-        for (Carrier &carrier : carrierIdMapper->carrierVector) {
+        for (Carrier &carrier: carrierIdMapper->carrierVector) {
             if (carrier.getId() == carrierIdMapper->getAbstractId(realCarrierId)) {
                 if (!newName.empty()) {
                     carrier.setName(newName);
@@ -122,17 +125,41 @@ public:
         }
 
         if (carrierGateway.updateCarrier(realCarrierId, newName)) {
-            std::cout << "Carrier with abstract ID " << abstractId << " updated successfully.\n";
+            std::cout << "Carrier with abstract ID " << abstractId
+                      << " updated successfully.\n";
         } else {
-            std::cerr << "Failed to update carrier with abstract ID " << abstractId << ".\n";
+            std::cerr << "Failed to update carrier with abstract ID " << abstractId
+                      << ".\n";
         }
     }
+
+    static bool isCarrierIdValid(int carrierId, const CarrierIdMapper& idMapper) {
+        for (const Carrier &carrier : idMapper.carrierVector) {
+            if (carrier.getId() == carrierId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static bool displayAllCarriers(const CarrierIdMapper& idMapper) {
+        if (idMapper.carrierVector.empty()) {
+            std::cerr << "No carriers available. Cannot proceed.\n";
+            return false;
+        }
+
+        std::cout << "Available Carriers:\n";
+        for (const Carrier &carrier : idMapper.carrierVector) {
+            std::cout << "{id=" << carrier.getId()
+                      << "; name=\"" << carrier.getName() << "\"}\n";
+        }
+        return true;
+    }
+
 
 private:
     CarrierGateway &carrierGateway;
     CarrierIdMapper *carrierIdMapper;
 };
 
-
-
-#endif //RPBD_CARRIERMENU_H
+#endif  // RPBD_CARRIERMENU_H

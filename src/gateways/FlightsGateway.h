@@ -15,9 +15,10 @@ class FlightsGateway {
   FlightsGateway();
 
   bool insertFlight(const std::string &flightNumber,
-                    const std::string &departureDate, int aircraftId,
-                    const std::string &flightClass, int availableSeats,
-                    int carrierId);
+                    const std::string &departureDate,
+                    int aircraftId,
+                    const std::string &flightClass,
+                    int availableSeats);
 
   bool deleteFlight(int flightId);
 
@@ -32,13 +33,16 @@ class FlightsGateway {
 
   bool getAllFlights(
       std::vector<std::tuple<int, std::string, std::string, int, std::string,
-                             int, int>> &flightData);
+                             int>> &flightData);
 
   bool findFlightsByNumber(const std::string &flightNumber,
                            std::vector<int> &matchingFlightIds);
 
   bool findFlightsByAircraft(int aircraftId,
                              std::vector<int> &matchingFlightIds);
+
+
+  int getLastInsertedId();
 
  private:
   DataBaseConnector *dbConnector;

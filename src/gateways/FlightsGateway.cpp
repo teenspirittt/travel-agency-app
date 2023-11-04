@@ -9,14 +9,14 @@ bool FlightsGateway::insertFlight(const std::string &flightNumber,
                                   const std::string &departureDate,
                                   int aircraftId,
                                   const std::string &flightClass,
-                                  int availableSeats, int carrierId) {
+                                  int availableSeats) {
   std::string query =
       "INSERT INTO Flights (flight_number, departure_date, aircraft_id, "
-      "class, available_seats, carrier_id) "
+      "class, available_seats) "
       "VALUES ('" +
       flightNumber + "', '" + departureDate + "', " +
       std::to_string(aircraftId) + ", '" + flightClass + "', " +
-      std::to_string(availableSeats) + ", " + std::to_string(carrierId) + ")";
+      std::to_string(availableSeats) + ")";
 
   return sqlExecuter->executeSQL(query);
 }
@@ -34,7 +34,7 @@ bool FlightsGateway::getFlight(int flightId, std::string &flightNumber,
                                int &carrierId) {
   std::string query =
       "SELECT flight_number, departure_date, aircraft_id, class, "
-      "available_seats, carrier_id "
+      "available_seats "
       "FROM Flights WHERE id = " +
       std::to_string(flightId);
 
@@ -86,7 +86,6 @@ bool FlightsGateway::updateFlight(int flightId, const std::string &flightNumber,
                       "', aircraft_id = " + std::to_string(aircraftId) +
                       ", class = '" + flightClass +
                       "', available_seats = " + std::to_string(availableSeats) +
-                      ", carrier_id = " + std::to_string(carrierId) +
                       " WHERE id = " + std::to_string(flightId);
 
   return sqlExecuter->executeSQL(query);
@@ -145,7 +144,7 @@ bool FlightsGateway::findFlightsByAircraft(
 }
 
 bool FlightsGateway::getAllFlights(
-    std::vector<std::tuple<int, std::string, std::string, int, std::string, int,
+    std::vector<std::tuple<int, std::string, std::string, int, std::string,
                            int>> &flightData) {
   std::string query =
       "SELECT id, flight_number, departure_date, aircraft_id, class, "
@@ -156,12 +155,9 @@ bool FlightsGateway::getAllFlights(
     SQLRETURN ret = SQL_SUCCESS;
     while (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
       int id, aircraft_id, available_seats, carrier_id;
-      char flight_numberBuffer[51];  // Изменено с 50 на 51 для поддержки полей
-                                     // в 50 символов.
-      char departure_dateBuffer[20];  // Изменено с 19 на 20, так как длина
-                                      // timestamp 19 символов.
-      char classBuffer[51];  // Изменено с 50 на 51 для поддержки полей в 50
-                             // символов.
+      char flight_numberBuffer[51];
+      char departure_dateBuffer[20];
+      char classBuffer[51];
 
       ret = SQLFetch(hstmt);
       if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
@@ -174,14 +170,13 @@ bool FlightsGateway::getAllFlights(
         ret = SQLGetData(hstmt, 5, SQL_C_CHAR, classBuffer, sizeof(classBuffer),
                          NULL);
         ret = SQLGetData(hstmt, 6, SQL_C_LONG, &available_seats, 0, NULL);
-        ret = SQLGetData(hstmt, 7, SQL_C_LONG, &carrier_id, 0, NULL);
 
         std::string flight_number(flight_numberBuffer);
         std::string departure_date(departure_dateBuffer);
         std::string flight_class(classBuffer);
 
         flightData.emplace_back(id, flight_number, departure_date, aircraft_id,
-                                flight_class, available_seats, carrier_id);
+                                flight_class, available_seats);
       }
     }
 
@@ -190,4 +185,29 @@ bool FlightsGateway::getAllFlights(
   }
 
   return false;
+}
+
+int FlightsGateway::getLastInsertedId() {
+  SQLHSTMT hstmt;
+  std::string query = "SELECT last_value FROM flights_id_seq";
+
+  if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret = SQL_SUCCESS;
+    int lastInsertedId = -1;
+
+    ret = SQLFetch(hstmt);
+    if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+      SQLLEN idLength;
+      ret = SQLGetData(hstmt, 1, SQL_C_SLONG, &lastInsertedId, 0, &idLength);
+      if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+        SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+        return lastInsertedId;
+      }
+    }
+
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+  }
+
+  std::cerr << "Failed to get the last inserted ID.\n";
+  return -1;
 }

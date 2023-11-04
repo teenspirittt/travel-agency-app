@@ -5,11 +5,12 @@
 #include "../models/Aircraft.h"
 #include "AircraftIdMapper.h"
 #include "CarrierIdMapper.h"
+#include "CarrierMenu.h"
 
 class AircraftMenu {
 public:
-    AircraftMenu(AircraftGateway &aGateway, CarrierGateway &cGateway)
-            : aircraftGateway(aGateway), carrierGateway(cGateway) {
+    explicit AircraftMenu(AircraftGateway &aGateway)
+            : aircraftGateway(aGateway) {
         aircraftIdMapper = &AircraftIdMapper::getInstance();
         carrierIdMapper = &CarrierIdMapper::getInstance();
     }
@@ -59,12 +60,12 @@ public:
         std::getline(std::cin, manufacturer);
 
         std::cout << "Insert carrier number: (required int)\n";
-        displayAllCarriers();
+        CarrierMenu::displayAllCarriers(*carrierIdMapper);
         std::cin >> carrierId;
 
-        if (!isCarrierIdValid(carrierId)) {
+        if (!CarrierMenu::isCarrierIdValid(carrierId, *carrierIdMapper)) {
             std::cerr << "Carrier " << carrierId << " does not exist.\n";
-            if (displayAllCarriers()) {
+            if (CarrierMenu::displayAllCarriers(*carrierIdMapper)) {
                 std::cout << "Please choose an existing carrier ID.\n";
                 return;
             } else {
@@ -135,34 +136,6 @@ public:
         }
     }
 
-    bool isCarrierIdValid(int carrierId) {
-        std::vector<std::tuple<int, std::string>> carrierData;
-        if (carrierGateway.getAllCarriers(carrierData)) {
-            for (const auto &carrier: carrierData) {
-                if (std::get<0>(carrier) == carrierId) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    bool displayAllCarriers() {
-        std::vector<std::tuple<int, std::string>> carrierData;
-        if (carrierGateway.getAllCarriers(carrierData)) {
-            std::cout << "Available Carriers:\n";
-            for (const auto &carrier: carrierData) {
-                std::cout << "{id="
-                          << carrierIdMapper->getAbstractId(std::get<0>(carrier))
-                          << "; name=\"" << std::get<1>(carrier) << "\"}\n";
-            }
-            return true;
-        } else {
-            std::cerr << "Failed to get carrier data.\n";
-            return false;
-        }
-    }
-
     void updateAircraft() {
         int abstractId;
         std::cout << "Enter the abstract ID of the aircraft you want to update: \n";
@@ -179,17 +152,20 @@ public:
         std::string newAircraftType, newManufacturer;
         int newCarrierId, newCapacity;
 
-        std::cout << "Enter new aircraft type (or press Enter to keep the current value): \n";
+        std::cout << "Enter new aircraft type (or press Enter to keep the current "
+                     "value): \n";
         std::cin.ignore();
         std::getline(std::cin, newAircraftType);
 
-        std::cout << "Enter new manufacturer (or press Enter to keep the current value): \n";
+        std::cout << "Enter new manufacturer (or press Enter to keep the current "
+                     "value): \n";
         std::getline(std::cin, newManufacturer);
-        std::cout << "Enter new capacity (or press Enter to keep the current value): \n";
+        std::cout
+                << "Enter new capacity (or press Enter to keep the current value): \n";
         std::cin >> newCapacity;
-        std::cout << "Enter new carrier ID (or press Enter to keep the current value): \n";
+        std::cout << "Enter new carrier ID (or press Enter to keep the current "
+                     "value): \n";
         std::cin >> newCarrierId;
-
 
         for (Aircraft &aircraft: aircraftIdMapper->aircraftVector) {
             if (aircraft.getId() == aircraftIdMapper->getAbstractId(realAircraftId)) {
@@ -217,17 +193,47 @@ public:
             }
         }
 
-        if (aircraftGateway.updateAircraft(realAircraftId, newAircraftType, newCarrierId, newManufacturer,
+        if (aircraftGateway.updateAircraft(realAircraftId, newAircraftType,
+                                           newCarrierId, newManufacturer,
                                            newCapacity)) {
-            std::cout << "Aircraft with abstract ID " << abstractId << " updated successfully.\n";
+            std::cout << "Aircraft with abstract ID " << abstractId
+                      << " updated successfully.\n";
         } else {
-            std::cerr << "Failed to update aircraft with abstract ID " << abstractId << ".\n";
+            std::cerr << "Failed to update aircraft with abstract ID " << abstractId
+                      << ".\n";
         }
+    }
+
+    static bool isAircraftIdValid(int aircraftId, const AircraftIdMapper &idMapper) {
+        for (const Aircraft &aircraft: idMapper.aircraftVector) {
+            if (aircraft.getId() == aircraftId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static bool displayAllAircraft(const AircraftIdMapper &idMapper) {
+        if (idMapper.aircraftVector.empty()) {
+            std::cerr << "No aircraft available. Cannot proceed.\n";
+            return false;
+        }
+
+        std::cout << "Available Aircraft:\n";
+        for (const Aircraft &aircraft: idMapper.aircraftVector) {
+            std::cout << "Abstract ID: " << aircraft.getId() << "\n";
+            std::cout << "Aircraft Type: " << aircraft.getAircraftType() << "\n";
+            std::cout << "Carrier ID: " << aircraft.getCarrierId() << "\n";
+            std::cout << "Manufacturer: " << aircraft.getManufacturer() << "\n";
+            std::cout << "Capacity: " << aircraft.getCapacity() << "\n";
+            std::cout << "\n";
+        }
+        return true;
     }
 
 private:
     AircraftGateway &aircraftGateway;
-    CarrierGateway &carrierGateway;
     AircraftIdMapper *aircraftIdMapper;
     CarrierIdMapper *carrierIdMapper;
+
 };
