@@ -13,6 +13,8 @@
 #include "./utils/AircraftMenu.h"
 #include "./utils/CarrierIdMapper.h"
 #include "./utils/CarrierMenu.h"
+#include "./utils/ClientIdMapper.h"
+#include "./utils/ClientMenu.h"
 #include "./utils/DataBaseConnector.h"
 #include "./utils/DataBaseInitializer.h"
 #include "./utils/FlightMenu.h"
@@ -34,23 +36,26 @@ int main() {
     if (dbInitializer.initializeDataBase()) {
       std::cout << "Init database";
     } else {
-      std::cout << "Init  database error";
+      std::cout << "Init database error";
     }
 
     AircraftIdMapper &aircraftIdMapper = AircraftIdMapper::getInstance();
     CarrierIdMapper &carrierIdMapper = CarrierIdMapper::getInstance();
     FlightIdMapper &flightIdMapper = FlightIdMapper::getInstance();
     HotelIdMapper &hotelIdMapper = HotelIdMapper::getInstance();
+    ClientIdMapper &clientIdMapper = ClientIdMapper::getInstance();
 
     AircraftGateway aircraftGateway;
     CarrierGateway carrierGateway;
     FlightsGateway flightsGateway;
     HotelGateway hotelGateway;
+    ClientGateway clientGateway;
 
     AircraftMenu aircraftMenu(aircraftGateway);
     CarrierMenu carrierMenu(carrierGateway);
     FlightMenu flightMenu(flightsGateway);
     HotelMenu hotelMenu(hotelGateway);
+    ClientMenu clientMenu(clientGateway);
 
     std::vector<std::tuple<int, std::string, int, std::string, int>>
         aircraftData;
@@ -109,6 +114,22 @@ int main() {
       }
     }
 
+    std::vector<
+        std::tuple<int, std::string, std::string, std::string, std::string>>
+        clientData;
+    if (clientGateway.getAllClients(clientData)) {
+      for (const auto &tuple : clientData) {
+        int realId = std::get<0>(tuple);
+
+        clientIdMapper.addMapping(clientIdMapper.generateNextAbstractId(),
+                                  realId);
+        Clients client(clientIdMapper.getAbstractId(realId), std::get<1>(tuple),
+                       std::get<2>(tuple), std::get<3>(tuple),
+                       std::get<4>(tuple));
+        clientIdMapper.clientVector.push_back(client);
+      }
+    }
+
     int choice;
     do {
       std::cout << "\n\nMain  Menu:\n";
@@ -131,6 +152,9 @@ int main() {
           break;
         case 2:
           carrierMenu.displayMenu();
+          break;
+        case 4:
+          clientMenu.displayMenu();
           break;
         case 7:
           flightMenu.displayMenu();

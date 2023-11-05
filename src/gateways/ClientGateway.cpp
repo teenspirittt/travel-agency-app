@@ -8,13 +8,11 @@ ClientGateway::ClientGateway() {
 bool ClientGateway::insertClient(const std::string &fullName,
                                  const std::string &phone,
                                  const std::string &orderDate,
-                                 const std::string &clientClass,
                                  const std::string &seat) {
   std::string query =
-      "INSERT INTO Clients (full_name, phone, order_date, class, seat) "
+      "INSERT INTO Clients (full_name, phone, order_date, seat) "
       "VALUES ('" +
-      fullName + "', '" + phone + "', '" + orderDate + "', '" + clientClass +
-      "', '" + seat + "')";
+      fullName + "', '" + phone + "', '" + orderDate + "', '" + seat + "')";
 
   return sqlExecuter->executeSQL(query);
 }
@@ -27,7 +25,7 @@ bool ClientGateway::deleteClient(int clientId) {
 
 bool ClientGateway::getClient(int clientId, std::string &fullName,
                               std::string &phone, std::string &orderDate,
-                              std::string &clientClass, std::string &seat) {
+                              std::string &seat) {
   std::string query =
       "SELECT full_name, phone, order_date, class, seat FROM Clients "
       "WHERE id = " +
@@ -37,7 +35,6 @@ bool ClientGateway::getClient(int clientId, std::string &fullName,
   char fullNameBuffer[256];
   char phoneBuffer[20];
   char orderDateBuffer[256];
-  char clientClassBuffer[50];
   char seatBuffer[10];
 
   if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
@@ -52,15 +49,12 @@ bool ClientGateway::getClient(int clientId, std::string &fullName,
                        &phoneLength);
       ret = SQLGetData(hstmt, 3, SQL_C_CHAR, orderDateBuffer,
                        sizeof(orderDateBuffer), &orderDateLength);
-      ret = SQLGetData(hstmt, 4, SQL_C_CHAR, clientClassBuffer,
-                       sizeof(clientClassBuffer), &clientClassLength);
-      ret = SQLGetData(hstmt, 5, SQL_C_CHAR, seatBuffer, sizeof(seatBuffer),
+      ret = SQLGetData(hstmt, 4, SQL_C_CHAR, seatBuffer, sizeof(seatBuffer),
                        &seatLength);
 
       fullName = fullNameBuffer;
       phone = phoneBuffer;
       orderDate = orderDateBuffer;
-      clientClass = clientClassBuffer;
       seat = seatBuffer;
 
       SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
@@ -76,13 +70,12 @@ bool ClientGateway::getClient(int clientId, std::string &fullName,
 bool ClientGateway::updateClient(int clientId, const std::string &fullName,
                                  const std::string &phone,
                                  const std::string &orderDate,
-                                 const std::string &clientClass,
                                  const std::string &seat) {
   std::string query =
       "UPDATE Clients "
       "SET full_name = '" +
       fullName + "', phone = '" + phone + "', order_date = '" + orderDate +
-      "', class = '" + clientClass + "', seat = '" + seat +
+      "', seat = '" + seat +
       "' "
       "WHERE id = " +
       std::to_string(clientId);
@@ -92,9 +85,9 @@ bool ClientGateway::updateClient(int clientId, const std::string &fullName,
 
 bool ClientGateway::getAllClients(
     std::vector<std::tuple<int, std::string, std::string, std::string,
-                           std::string, std::string>> &clientData) {
+                           std::string>> &clientData) {
   std::string query =
-      "SELECT id, full_name, phone, order_date, class, seat FROM Clients";
+      "SELECT id, full_name, phone, order_date, seat FROM Clients";
   SQLHSTMT hstmt;
 
   if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
@@ -104,7 +97,6 @@ bool ClientGateway::getAllClients(
       char full_nameBuffer[256];
       char phoneBuffer[20];
       char order_dateBuffer[50];
-      char classBuffer[50];
       char seatBuffer[10];
 
       ret = SQLFetch(hstmt);
@@ -116,19 +108,15 @@ bool ClientGateway::getAllClients(
                          NULL);
         ret = SQLGetData(hstmt, 4, SQL_C_CHAR, order_dateBuffer,
                          sizeof(order_dateBuffer), NULL);
-        ret = SQLGetData(hstmt, 5, SQL_C_CHAR, classBuffer, sizeof(classBuffer),
-                         NULL);
-        ret = SQLGetData(hstmt, 6, SQL_C_CHAR, seatBuffer, sizeof(seatBuffer),
+        ret = SQLGetData(hstmt, 5, SQL_C_CHAR, seatBuffer, sizeof(seatBuffer),
                          NULL);
 
         std::string full_name(full_nameBuffer);
         std::string phone(phoneBuffer);
         std::string order_date(order_dateBuffer);
-        std::string class_field(classBuffer);
         std::string seat(seatBuffer);
 
-        clientData.emplace_back(id, full_name, phone, order_date, class_field,
-                                seat);
+        clientData.emplace_back(id, full_name, phone, order_date, seat);
       }
     }
 
@@ -191,4 +179,29 @@ bool ClientGateway::findClientsByOrderDate(
   }
 
   return false;
+}
+
+int ClientGateway::getLastInsertedId() {
+  SQLHSTMT hstmt;
+  std::string query = "SELECT last_value FROM clients_id_seq";
+
+  if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret = SQL_SUCCESS;
+    int lastInsertedId = -1;
+
+    ret = SQLFetch(hstmt);
+    if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+      SQLLEN idLength;
+      ret = SQLGetData(hstmt, 1, SQL_C_SLONG, &lastInsertedId, 0, &idLength);
+      if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+        SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+        return lastInsertedId;
+      }
+    }
+
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+  }
+
+  std::cerr << "Failed to get the last inserted ID.\n";
+  return -1;
 }
