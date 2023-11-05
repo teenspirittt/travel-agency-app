@@ -31,6 +31,8 @@ class EmployeeGateway {
   bool findEmployeesByPosition(const std::string &position,
                                std::vector<int> &matchingEmployeeIds);
 
+  int getLastInsertedId();
+
  private:
   DataBaseConnector *dbConnector;
   SqlExecuter *sqlExecuter;

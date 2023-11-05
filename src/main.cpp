@@ -9,6 +9,7 @@
 #include "./gateways/HotelGateway.h"
 #include "./models/Aircraft.h"
 #include "./models/Carriers.h"
+#include "./models/Employees.h"
 #include "./utils/AircraftIdMapper.h"
 #include "./utils/AircraftMenu.h"
 #include "./utils/CarrierIdMapper.h"
@@ -17,6 +18,8 @@
 #include "./utils/ClientMenu.h"
 #include "./utils/DataBaseConnector.h"
 #include "./utils/DataBaseInitializer.h"
+#include "./utils/EmployeeIdMapper.h"
+#include "./utils/EmployeeMenu.h"
 #include "./utils/FlightMenu.h"
 #include "./utils/HotelIdMapper.h"
 #include "./utils/HotelMenu.h"
@@ -44,18 +47,21 @@ int main() {
     FlightIdMapper &flightIdMapper = FlightIdMapper::getInstance();
     HotelIdMapper &hotelIdMapper = HotelIdMapper::getInstance();
     ClientIdMapper &clientIdMapper = ClientIdMapper::getInstance();
+    EmployeeIdMapper &employeeIdMapper = EmployeeIdMapper::getInstance();
 
     AircraftGateway aircraftGateway;
     CarrierGateway carrierGateway;
     FlightsGateway flightsGateway;
     HotelGateway hotelGateway;
     ClientGateway clientGateway;
+    EmployeeGateway employeeGateway;
 
     AircraftMenu aircraftMenu(aircraftGateway);
     CarrierMenu carrierMenu(carrierGateway);
     FlightMenu flightMenu(flightsGateway);
     HotelMenu hotelMenu(hotelGateway);
     ClientMenu clientMenu(clientGateway);
+    EmployeeMenu employeeMenu(employeeGateway);
 
     std::vector<std::tuple<int, std::string, int, std::string, int>>
         aircraftData;
@@ -130,9 +136,26 @@ int main() {
       }
     }
 
+    std::vector<std::tuple<int, std::string, std::string, std::string,
+                           std::string, double>>
+        employeeData;
+    if (employeeGateway.getAllEmployees(employeeData)) {
+      for (const auto &tuple : employeeData) {
+        int realId = std::get<0>(tuple);
+
+        employeeIdMapper.addMapping(employeeIdMapper.generateNextAbstractId(),
+                                    realId);
+        Employees employee(employeeIdMapper.getAbstractId(realId),
+                           std::get<1>(tuple), std::get<2>(tuple),
+                           std::get<3>(tuple), std::get<4>(tuple),
+                           std::get<5>(tuple));
+        employeeIdMapper.employeeVector.push_back(employee);
+      }
+    }
+
     int choice;
     do {
-      std::cout << "\n\nMain  Menu:\n";
+      std::cout << "\n\nMain Menu:\n";
       std::cout << "1. Aircraft Menu\n";
       std::cout << "2. Carrier Menu\n";
       std::cout << "3. Client Route Menu\n";
@@ -155,6 +178,9 @@ int main() {
           break;
         case 4:
           clientMenu.displayMenu();
+          break;
+        case 6:
+          employeeMenu.displayMenu();
           break;
         case 7:
           flightMenu.displayMenu();
