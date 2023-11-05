@@ -26,6 +26,8 @@ class HotelGateway {
   bool findHotelsByName(const std::string &name,
                         std::vector<int> &matchingHotelIds);
 
+  int getLastInsertedId();
+
  private:
   DataBaseConnector *dbConnector;
   SqlExecuter *sqlExecuter;

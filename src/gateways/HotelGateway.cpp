@@ -125,3 +125,28 @@ bool HotelGateway::findHotelsByName(const std::string &name,
 
   return false;
 }
+
+int HotelGateway::getLastInsertedId() {
+  SQLHSTMT hstmt;
+  std::string query = "SELECT last_value FROM hotels_id_seq";
+
+  if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret = SQL_SUCCESS;
+    int lastInsertedId = -1;
+
+    ret = SQLFetch(hstmt);
+    if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+      SQLLEN idLength;
+      ret = SQLGetData(hstmt, 1, SQL_C_SLONG, &lastInsertedId, 0, &idLength);
+      if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+        SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+        return lastInsertedId;
+      }
+    }
+
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+  }
+
+  std::cerr << "Failed to get the last inserted ID.\n";
+  return -1;
+}

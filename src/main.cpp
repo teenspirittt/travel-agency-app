@@ -16,6 +16,8 @@
 #include "./utils/DataBaseConnector.h"
 #include "./utils/DataBaseInitializer.h"
 #include "./utils/FlightMenu.h"
+#include "./utils/HotelIdMapper.h"
+#include "./utils/HotelMenu.h"
 
 int main() {
   DataBaseConnector &dbConnector = DataBaseConnector::getInstance();
@@ -38,14 +40,17 @@ int main() {
     AircraftIdMapper &aircraftIdMapper = AircraftIdMapper::getInstance();
     CarrierIdMapper &carrierIdMapper = CarrierIdMapper::getInstance();
     FlightIdMapper &flightIdMapper = FlightIdMapper::getInstance();
+    HotelIdMapper &hotelIdMapper = HotelIdMapper::getInstance();
 
     AircraftGateway aircraftGateway;
     CarrierGateway carrierGateway;
     FlightsGateway flightsGateway;
+    HotelGateway hotelGateway;
 
     AircraftMenu aircraftMenu(aircraftGateway);
     CarrierMenu carrierMenu(carrierGateway);
     FlightMenu flightMenu(flightsGateway);
+    HotelMenu hotelMenu(hotelGateway);
 
     std::vector<std::tuple<int, std::string, int, std::string, int>>
         aircraftData;
@@ -91,6 +96,19 @@ int main() {
       }
     }
 
+    std::vector<std::tuple<int, std::string, int, std::string>> hotelData;
+    if (hotelGateway.getAllHotels(hotelData)) {
+      for (const auto &tuple : hotelData) {
+        int realId = std::get<0>(tuple);
+
+        hotelIdMapper.addMapping(hotelIdMapper.generateNextAbstractId(),
+                                 realId);
+        Hotels hotel(hotelIdMapper.getAbstractId(realId), std::get<1>(tuple),
+                     std::get<2>(tuple), std::get<3>(tuple));
+        hotelIdMapper.hotelVector.push_back(hotel);
+      }
+    }
+
     int choice;
     do {
       std::cout << "\n\nMain  Menu:\n";
@@ -116,6 +134,9 @@ int main() {
           break;
         case 7:
           flightMenu.displayMenu();
+          break;
+        case 8:
+          hotelMenu.displayMenu();
           break;
         case 10:
           std::cout << "Exiting the program.\n";

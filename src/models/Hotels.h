@@ -5,9 +5,12 @@
 
 class Hotels {
  public:
-  Hotels(const std::string& name, int hotelClass,
+  Hotels(int id, const std::string& name, int hotelClass,
          const std::string& roomCategory)
-      : name(name), hotelClass(hotelClass), roomCategory(roomCategory) {}
+      : id(id),
+        name(name),
+        hotelClass(hotelClass),
+        roomCategory(roomCategory) {}
 
   const std::string& getName() const { return name; }
   int getHotelClass() const { return hotelClass; }
@@ -18,8 +21,10 @@ class Hotels {
   void setRoomCategory(const std::string& roomCategory) {
     this->roomCategory = roomCategory;
   }
+  int getId() const { return id; }
 
  private:
+  int id;
   std::string name;
   int hotelClass;
   std::string roomCategory;
