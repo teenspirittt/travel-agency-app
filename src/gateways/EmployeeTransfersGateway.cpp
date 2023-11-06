@@ -1,36 +1,37 @@
-#include "EmployeeTransfers.h"
+#include "EmployeeTransfersGateway.h"
 
-EmployeeTransfers::EmployeeTransfers() {
+EmployeeTransfersGateway::EmployeeTransfersGateway() {
   dbConnector = &DataBaseConnector::getInstance();
   sqlExecuter = &SqlExecuter::getInstance();
 }
 
-bool EmployeeTransfers::insertTransfer(int employeeId,
-                                       const std::string &oldPosition,
-                                       const std::string &transferReason,
-                                       const std::string &orderNumber) {
+bool EmployeeTransfersGateway::insertTransfer(int employeeId,
+                                              const std::string &oldPosition,
+                                              const std::string &transferReason,
+                                              const std::string &orderNumber,
+                                              const std::string &orderDate) {
   std::string query =
       "INSERT INTO Employee_Transfers (employee_id, old_position, "
-      "transfer_reason, order_number) "
+      "transfer_reason, order_number, order_date) "
       "VALUES (" +
       std::to_string(employeeId) + ", '" + oldPosition + "', '" +
-      transferReason + "', '" + orderNumber + "')";
+      transferReason + "', '" + orderNumber + "', '" + orderDate + "')";
 
   return sqlExecuter->executeSQL(query);
 }
 
-bool EmployeeTransfers::deleteTransfer(int transferId) {
+bool EmployeeTransfersGateway::deleteTransfer(int transferId) {
   std::string query =
       "DELETE FROM Employee_Transfers WHERE id = " + std::to_string(transferId);
 
   return sqlExecuter->executeSQL(query);
 }
-bool EmployeeTransfers::getAllTransfers(
+bool EmployeeTransfersGateway::getAllTransfers(
     std::vector<std::tuple<int, int, std::string, std::string, std::string,
                            std::string>> &transferData) {
   std::string query =
       "SELECT id, employee_id, old_position, transfer_reason, order_number, "
-      "order_date FROM Transfers";
+      "order_date FROM Employee_Transfers";
   SQLHSTMT hstmt;
 
   if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
@@ -71,28 +72,29 @@ bool EmployeeTransfers::getAllTransfers(
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return !transferData.empty();
   }
-
   return false;
 }
 
-bool EmployeeTransfers::updateTransfer(int transferId, int employeeId,
-                                       const std::string &oldPosition,
-                                       const std::string &transferReason,
-                                       const std::string &orderNumber) {
+bool EmployeeTransfersGateway::updateTransfer(int transferId, int employeeId,
+                                              const std::string &oldPosition,
+                                              const std::string &transferReason,
+                                              const std::string &orderNumber,
+                                              const std::string &orderDate) {
   std::string query = "UPDATE Employee_Transfers SET employee_id = " +
                       std::to_string(employeeId) + ", old_position = '" +
                       oldPosition + "', transfer_reason = '" + transferReason +
                       "', order_number = '" + orderNumber +
+                      "', order_date = '" + orderDate +
                       "' WHERE id = " + std::to_string(transferId);
 
   std::cout << query << std::endl;
   return sqlExecuter->executeSQL(query);
 }
 
-bool EmployeeTransfers::getTransfer(int transferId, int &employeeId,
-                                    std::string &oldPosition,
-                                    std::string &transferReason,
-                                    std::string &orderNumber) {
+bool EmployeeTransfersGateway::getTransfer(int transferId, int &employeeId,
+                                           std::string &oldPosition,
+                                           std::string &transferReason,
+                                           std::string &orderNumber) {
   std::string query =
       "SELECT employee_id, old_position, transfer_reason, order_number FROM "
       "Employee_Transfers "
@@ -131,7 +133,7 @@ bool EmployeeTransfers::getTransfer(int transferId, int &employeeId,
   return false;
 }
 
-bool EmployeeTransfers::findTransfersByEmployee(
+bool EmployeeTransfersGateway::findTransfersByEmployee(
     int employeeId, std::vector<int> &matchingTransferIds) {
   matchingTransferIds.clear();
 
@@ -155,4 +157,29 @@ bool EmployeeTransfers::findTransfersByEmployee(
   }
 
   return false;
+}
+
+int EmployeeTransfersGateway::getLastInsertedId() {
+  SQLHSTMT hstmt;
+  std::string query = "SELECT last_value FROM employee_transfers_id_seq";
+
+  if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
+    SQLRETURN ret = SQL_SUCCESS;
+    int lastInsertedId = -1;
+
+    ret = SQLFetch(hstmt);
+    if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+      SQLLEN idLength;
+      ret = SQLGetData(hstmt, 1, SQL_C_SLONG, &lastInsertedId, 0, &idLength);
+      if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+        SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+        return lastInsertedId;
+      }
+    }
+
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+  }
+
+  std::cerr << "Failed to get the last inserted ID.\n";
+  return -1;
 }

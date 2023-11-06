@@ -236,4 +236,4 @@ class EmployeeMenu {
   EmployeeIdMapper* employeeIdMapper;
 };
 
-#endif RPBD_EMPLOYEEMENU_H
+#endif  // RPBD_EMPLOYEEMENU_H

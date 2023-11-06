@@ -84,13 +84,12 @@ class FlightMenu {
     std::cin >> availableSeats;
 
     Flights flight(flightIdMapper->generateNextAbstractId(), flightNumber,
-                   departureDate, aircraftIdMapper->getRealId(aircraftId),
-                   flightClass, availableSeats);
+                   departureDate, aircraftId, flightClass, availableSeats);
 
     if (flightGateway.insertFlight(
             flight.getFlightNumber(), flight.getDepartureDate(),
-            flight.getAircraftId(), flight.getFlightClass(),
-            flight.getAvailableSeats())) {
+            aircraftIdMapper->getRealId(flight.getAircraftId()),
+            flight.getFlightClass(), flight.getAvailableSeats())) {
       std::cout << "Flight inserted successfully. " << flight.getId() << "\n";
       flightIdMapper->flightVector.push_back(flight);
       flightIdMapper->addMapping(flight.getId(),
@@ -217,8 +216,9 @@ class FlightMenu {
     }
 
     if (flightGateway.updateFlight(
-            realFlightId, newFlightNumber, newDepartureDate, newAircraftId,
-            newFlightClass, newAvailableSeats, newCarrierId)) {
+            realFlightId, newFlightNumber, newDepartureDate,
+            aircraftIdMapper->getRealId(newAircraftId), newFlightClass,
+            newAvailableSeats, newCarrierId)) {
       std::cout << "Flight with ID " << flightId << " updated successfully.\n";
     } else {
       std::cerr << "Failed to update flight with ID " << flightId << ".\n";

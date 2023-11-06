@@ -77,11 +77,11 @@ class AircraftMenu {
     std::cin >> capacity;
 
     Aircraft aircraft(aircraftIdMapper->generateNextAbstractId(), aircraftType,
-                      carrierIdMapper->getAbstractId(carrierId), manufacturer,
-                      capacity);
+                      carrierId, manufacturer, capacity);
 
     if (aircraftGateway.insertAircraft(
-            aircraft.getAircraftType(), aircraft.getCarrierId(),
+            aircraft.getAircraftType(),
+            carrierIdMapper->getRealId(aircraft.getCarrierId()),
             aircraft.getManufacturer(), aircraft.getCapacity())) {
       std::cout << "Aircraft inserted successfully. " << aircraft.getId()
                 << "\n";
@@ -193,8 +193,8 @@ class AircraftMenu {
     }
 
     if (aircraftGateway.updateAircraft(realAircraftId, newAircraftType,
-                                       newCarrierId, newManufacturer,
-                                       newCapacity)) {
+                                       carrierIdMapper->getRealId(newCarrierId),
+                                       newManufacturer, newCapacity)) {
       std::cout << "Aircraft with abstract ID " << abstractId
                 << " updated successfully.\n";
     } else {

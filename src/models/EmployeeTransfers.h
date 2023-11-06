@@ -5,11 +5,12 @@
 
 class EmployeeTransfers {
  public:
-  EmployeeTransfers(int employeeId, const std::string& newPosition,
+  EmployeeTransfers(int id, int employeeId, const std::string& newPosition,
                     const std::string& transferReason,
                     const std::string& orderNumber,
                     const std::string& orderDate)
-      : employeeId(employeeId),
+      : id(id),
+        employeeId(employeeId),
         newPosition(newPosition),
         transferReason(transferReason),
         orderNumber(orderNumber),
@@ -35,7 +36,10 @@ class EmployeeTransfers {
     this->orderDate = orderDate;
   }
 
+  int getId() const { return id; }
+
  private:
+  int id;
   int employeeId;
   std::string newPosition;
   std::string transferReason;
@@ -43,4 +47,4 @@ class EmployeeTransfers {
   std::string orderDate;
 };
 
-#endif
+#endif  // EMPLOYEETRANSFERS_H

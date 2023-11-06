@@ -27,7 +27,8 @@ bool SqlExecuter::executeSQL(const std::string& sqlQuery) {
   }
 
   SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-  return true;
+
+    return true;
 }
 
 bool SqlExecuter::executeSQLWithResults(const std::string& sqlQuery,

@@ -4,11 +4,12 @@
 #include "./gateways/CarrierGateway.h"
 #include "./gateways/ClientGateway.h"
 #include "./gateways/EmployeeGateway.h"
-#include "./gateways/EmployeeTransfers.h"
+#include "./gateways/EmployeeTransfersGateway.h"
 #include "./gateways/FlightsGateway.h"
 #include "./gateways/HotelGateway.h"
 #include "./models/Aircraft.h"
 #include "./models/Carriers.h"
+#include "./models/EmployeeTransfers.h"
 #include "./models/Employees.h"
 #include "./utils/AircraftIdMapper.h"
 #include "./utils/AircraftMenu.h"
@@ -20,6 +21,8 @@
 #include "./utils/DataBaseInitializer.h"
 #include "./utils/EmployeeIdMapper.h"
 #include "./utils/EmployeeMenu.h"
+#include "./utils/EmployeeTransferIdMapper.h"
+#include "./utils/EmployeeTransferMenu.h"
 #include "./utils/FlightMenu.h"
 #include "./utils/HotelIdMapper.h"
 #include "./utils/HotelMenu.h"
@@ -37,9 +40,9 @@ int main() {
     DataBaseInitializer dbInitializer(dbConnector);
 
     if (dbInitializer.initializeDataBase()) {
-      std::cout << "Init database";
+      std::cout << "Init database\n";
     } else {
-      std::cout << "Init database error";
+      std::cout << "Init database error\n";
     }
 
     AircraftIdMapper &aircraftIdMapper = AircraftIdMapper::getInstance();
@@ -48,6 +51,8 @@ int main() {
     HotelIdMapper &hotelIdMapper = HotelIdMapper::getInstance();
     ClientIdMapper &clientIdMapper = ClientIdMapper::getInstance();
     EmployeeIdMapper &employeeIdMapper = EmployeeIdMapper::getInstance();
+    EmployeeTransfersIdMapper &transferIdMapper =
+        EmployeeTransfersIdMapper::getInstance();
 
     AircraftGateway aircraftGateway;
     CarrierGateway carrierGateway;
@@ -55,6 +60,7 @@ int main() {
     HotelGateway hotelGateway;
     ClientGateway clientGateway;
     EmployeeGateway employeeGateway;
+    EmployeeTransfersGateway transferGateway;
 
     AircraftMenu aircraftMenu(aircraftGateway);
     CarrierMenu carrierMenu(carrierGateway);
@@ -62,20 +68,7 @@ int main() {
     HotelMenu hotelMenu(hotelGateway);
     ClientMenu clientMenu(clientGateway);
     EmployeeMenu employeeMenu(employeeGateway);
-
-    std::vector<std::tuple<int, std::string, int, std::string, int>>
-        aircraftData;
-    if (aircraftGateway.getAllAircraft(aircraftData)) {
-      for (const auto &tuple : aircraftData) {
-        int realId = std::get<0>(tuple);
-        aircraftIdMapper.addMapping(aircraftIdMapper.generateNextAbstractId(),
-                                    realId);
-        Aircraft aircraft(aircraftIdMapper.getAbstractId(realId),
-                          std::get<1>(tuple), std::get<2>(tuple),
-                          std::get<3>(tuple), std::get<4>(tuple));
-        aircraftIdMapper.aircraftVector.push_back(aircraft);
-      }
-    }
+    EmployeeTransferMenu transferMenu(transferGateway);
 
     std::vector<std::tuple<int, std::string>> carrierData;
     if (carrierGateway.getAllCarriers(carrierData)) {
@@ -90,6 +83,22 @@ int main() {
       }
     }
 
+    // init aircraft map id
+    std::vector<std::tuple<int, std::string, int, std::string, int>>
+        aircraftData;
+    if (aircraftGateway.getAllAircraft(aircraftData)) {
+      for (const auto &tuple : aircraftData) {
+        int realId = std::get<0>(tuple);
+        aircraftIdMapper.addMapping(aircraftIdMapper.generateNextAbstractId(),
+                                    realId);
+        Aircraft aircraft(aircraftIdMapper.getAbstractId(realId),
+                          std::get<1>(tuple),
+                          carrierIdMapper.getAbstractId(std::get<2>(tuple)),
+                          std::get<3>(tuple), std::get<4>(tuple));
+        aircraftIdMapper.aircraftVector.push_back(aircraft);
+      }
+    }
+
     std::vector<
         std::tuple<int, std::string, std::string, int, std::string, int>>
         flightData;
@@ -101,7 +110,8 @@ int main() {
                                   realId);
 
         Flights flight(flightIdMapper.getAbstractId(realId), std::get<1>(tuple),
-                       std::get<2>(tuple), std::get<3>(tuple),
+                       std::get<2>(tuple),
+                       aircraftIdMapper.getAbstractId(std::get<3>(tuple)),
                        std::get<4>(tuple), std::get<5>(tuple));
         flightIdMapper.flightVector.push_back(flight);
       }
@@ -153,9 +163,27 @@ int main() {
       }
     }
 
+    std::vector<std::tuple<int, int, std::string, std::string, std::string,
+                           std::string>>
+        transferData;
+    if (transferGateway.getAllTransfers(transferData)) {
+      for (const auto &tuple : transferData) {
+        int realId = std::get<0>(tuple);
+        std::cout << realId << " real id\n";
+        transferIdMapper.addMapping(transferIdMapper.generateNextAbstractId(),
+                                    realId);
+        EmployeeTransfers transfer(
+            transferIdMapper.getAbstractId(realId),
+            employeeIdMapper.getAbstractId(std::get<1>(tuple)),
+            std::get<2>(tuple), std::get<3>(tuple), std::get<4>(tuple),
+            std::get<5>(tuple));
+        transferIdMapper.employeeTransfersVector.push_back(transfer);
+      }
+    }
+
     int choice;
     do {
-      std::cout << "\n\nMain Menu:\n";
+      std::cout << "\n\nMain  Menu:\n";
       std::cout << "1. Aircraft Menu\n";
       std::cout << "2. Carrier Menu\n";
       std::cout << "3. Client Route Menu\n";
@@ -166,7 +194,7 @@ int main() {
       std::cout << "8. Hotel Menu\n";
       std::cout << "9. Route  Menu\n";
       std::cout << "10. Exit\n";
-      std::cout << "Enter your  choice: ";
+      std::cout << "Enter your choice: ";
       std::cin >> choice;
 
       switch (choice) {
@@ -178,6 +206,9 @@ int main() {
           break;
         case 4:
           clientMenu.displayMenu();
+          break;
+        case 5:
+          transferMenu.displayMenu();
           break;
         case 6:
           employeeMenu.displayMenu();
