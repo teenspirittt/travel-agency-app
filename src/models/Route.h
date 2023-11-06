@@ -5,11 +5,12 @@
 
 class Route {
  public:
-  Route(const std::string& name, const std::string& country,
+  Route(int id, const std::string& name, const std::string& country,
         const std::string& city, int duration, int hotelId, int flightId,
         int employeeId, const std::string& agencyRepName,
         const std::string& agencyRepPhone)
-      : name(name),
+      : id(id),
+        name(name),
         country(country),
         city(city),
         duration(duration),
@@ -43,7 +44,10 @@ class Route {
     this->agencyRepPhone = agencyRepPhone;
   }
 
+  int getId() const { return id; }
+
  private:
+  int id;
   std::string name;
   std::string country;
   std::string city;

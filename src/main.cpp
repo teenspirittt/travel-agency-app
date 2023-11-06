@@ -7,6 +7,7 @@
 #include "./gateways/EmployeeTransfersGateway.h"
 #include "./gateways/FlightsGateway.h"
 #include "./gateways/HotelGateway.h"
+#include "./gateways/RouteGateway.h"
 #include "./models/Aircraft.h"
 #include "./models/Carriers.h"
 #include "./models/EmployeeTransfers.h"
@@ -26,6 +27,8 @@
 #include "./utils/FlightMenu.h"
 #include "./utils/HotelIdMapper.h"
 #include "./utils/HotelMenu.h"
+#include "./utils/RouteIdMapper.h"
+#include "./utils/RouteMenu.h"
 
 int main() {
   DataBaseConnector &dbConnector = DataBaseConnector::getInstance();
@@ -53,6 +56,7 @@ int main() {
     EmployeeIdMapper &employeeIdMapper = EmployeeIdMapper::getInstance();
     EmployeeTransfersIdMapper &transferIdMapper =
         EmployeeTransfersIdMapper::getInstance();
+    RouteIdMapper &routeIdMapper = RouteIdMapper::getInstance();
 
     AircraftGateway aircraftGateway;
     CarrierGateway carrierGateway;
@@ -61,6 +65,7 @@ int main() {
     ClientGateway clientGateway;
     EmployeeGateway employeeGateway;
     EmployeeTransfersGateway transferGateway;
+    RouteGateway routeGateway;
 
     AircraftMenu aircraftMenu(aircraftGateway);
     CarrierMenu carrierMenu(carrierGateway);
@@ -69,6 +74,7 @@ int main() {
     ClientMenu clientMenu(clientGateway);
     EmployeeMenu employeeMenu(employeeGateway);
     EmployeeTransferMenu transferMenu(transferGateway);
+    RouteMenu routeMenu(routeGateway);
 
     std::vector<std::tuple<int, std::string>> carrierData;
     if (carrierGateway.getAllCarriers(carrierData)) {
@@ -99,6 +105,7 @@ int main() {
       }
     }
 
+    // init flight map id
     std::vector<
         std::tuple<int, std::string, std::string, int, std::string, int>>
         flightData;
@@ -117,6 +124,7 @@ int main() {
       }
     }
 
+    // init hotel map id
     std::vector<std::tuple<int, std::string, int, std::string>> hotelData;
     if (hotelGateway.getAllHotels(hotelData)) {
       for (const auto &tuple : hotelData) {
@@ -130,6 +138,7 @@ int main() {
       }
     }
 
+    // init client map id
     std::vector<
         std::tuple<int, std::string, std::string, std::string, std::string>>
         clientData;
@@ -146,6 +155,7 @@ int main() {
       }
     }
 
+    // init employee map id
     std::vector<std::tuple<int, std::string, std::string, std::string,
                            std::string, double>>
         employeeData;
@@ -163,6 +173,7 @@ int main() {
       }
     }
 
+    // init transfer map id
     std::vector<std::tuple<int, int, std::string, std::string, std::string,
                            std::string>>
         transferData;
@@ -181,9 +192,29 @@ int main() {
       }
     }
 
+    // init route map id
+    std::vector<std::tuple<int, std::string, std::string, std::string, int, int,
+                           int, int, std::string, std::string>>
+        routeData;
+    if (routeGateway.getAllRoutes(routeData)) {
+      for (const auto &tuple : routeData) {
+        int realId = std::get<0>(tuple);
+        std::cout << realId << " real id\n";
+        routeIdMapper.addMapping(routeIdMapper.generateNextAbstractId(),
+                                 realId);
+        Route route(routeIdMapper.getAbstractId(realId), std::get<1>(tuple),
+                    std::get<2>(tuple), std::get<3>(tuple), std::get<4>(tuple),
+                    hotelIdMapper.getAbstractId(std::get<5>(tuple)),
+                    flightIdMapper.getAbstractId(std::get<6>(tuple)),
+                    employeeIdMapper.getAbstractId(std::get<7>(tuple)),
+                    std::get<8>(tuple), std::get<9>(tuple));
+        routeIdMapper.routeVector.push_back(route);
+      }
+    }
+
     int choice;
     do {
-      std::cout << "\n\nMain  Menu:\n";
+      std::cout << "\n\nMain Menu:\n";
       std::cout << "1. Aircraft Menu\n";
       std::cout << "2. Carrier Menu\n";
       std::cout << "3. Client Route Menu\n";
@@ -218,6 +249,9 @@ int main() {
           break;
         case 8:
           hotelMenu.displayMenu();
+          break;
+        case 9:
+          routeMenu.displayMenu();
           break;
         case 10:
           std::cout << "Exiting the program.\n";

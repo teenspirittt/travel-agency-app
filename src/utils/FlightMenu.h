@@ -246,6 +246,30 @@ class FlightMenu {
     }
   }
 
+  static bool isFlightIdValid(int flightId, const FlightIdMapper &idMapper) {
+    for (const Flights &flight : idMapper.flightVector) {
+      if (flight.getId() == flightId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static bool displayAllFlights(const FlightIdMapper &idMapper) {
+    if (idMapper.flightVector.empty()) {
+      std::cerr << "No flights available. Cannot proceed.\n";
+      return false;
+    }
+
+    std::cout << "Available Flights:\n";
+    for (const Flights &flight : idMapper.flightVector) {
+      std::cout << "{id=" << flight.getId() << "; flight_number=\""
+                << flight.getFlightNumber() << "; available_seats=\""
+                << flight.getAvailableSeats() << "\"}\n";
+    }
+    return true;
+  }
+
  private:
   FlightsGateway &flightGateway;
   FlightIdMapper *flightIdMapper;

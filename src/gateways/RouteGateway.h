@@ -37,6 +37,8 @@ class RouteGateway {
   bool findRoutesByCity(const std::string &city,
                         std::vector<int> &matchingRouteIds);
 
+  int getLastInsertedId();
+
  private:
   DataBaseConnector *dbConnector;
   SqlExecuter *sqlExecuter;
