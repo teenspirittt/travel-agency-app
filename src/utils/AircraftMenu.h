@@ -9,7 +9,8 @@
 
 class AircraftMenu {
  public:
-  explicit AircraftMenu(AircraftGateway &aGateway) : aircraftGateway(aGateway) {
+  explicit AircraftMenu(AircraftGateway &aGateway, CarrierGateway &cGateway)
+      : aircraftGateway(aGateway), carrierGateway(cGateway) {
     aircraftIdMapper = &AircraftIdMapper::getInstance();
     carrierIdMapper = &CarrierIdMapper::getInstance();
   }
@@ -52,7 +53,7 @@ class AircraftMenu {
     std::string aircraftType, manufacturer;
     int carrierId, capacity;
 
-    std::cout << "Insert aircraft type: (required string)\n";
+    std::cout << "Insert aircraft model: (required string)\n";
     std::cin.ignore();
     std::getline(std::cin, aircraftType);
     std::cout << "Insert manufacturer: (required string)\n";
@@ -63,9 +64,9 @@ class AircraftMenu {
     std::cin >> carrierId;
 
     if (!CarrierMenu::isCarrierIdValid(carrierId, *carrierIdMapper)) {
-      std::cerr << "Carrier " << carrierId << " does not exist.\n";
+      std::cerr << "Carrier #" << carrierId << " does not exist.\n";
       if (CarrierMenu::displayAllCarriers(*carrierIdMapper)) {
-        std::cout << "Please choose an existing carrier ID.\n";
+        std::cout << "Please choose an existing carrier.\n";
         return;
       } else {
         std::cerr << "No carriers available. Cannot proceed.\n";
@@ -95,24 +96,23 @@ class AircraftMenu {
 
   void deleteAircraft() {
     int abstractId;
-    std::cout << "Insert id to delete\n";
+    std::cout << "Insert number to delete\n";
     std::cin >> abstractId;
-
-    for (auto it = aircraftIdMapper->aircraftVector.begin();
-         it != aircraftIdMapper->aircraftVector.end(); ++it) {
-      if (it->getId() == abstractId) {
-        aircraftIdMapper->aircraftVector.erase(it);
-        break;
-      }
-    }
 
     if (aircraftGateway.deleteAircraft(
             aircraftIdMapper->getRealId(abstractId))) {
-      std::cout << "Aircraft with abstract ID " << abstractId
-                << " deleted successfully.\n";
+      std::cout << "Aircraft #" << abstractId << " deleted successfully.\n";
+
+      for (auto it = aircraftIdMapper->aircraftVector.begin();
+           it != aircraftIdMapper->aircraftVector.end(); ++it) {
+        if (it->getId() == abstractId) {
+          aircraftIdMapper->aircraftVector.erase(it);
+          break;
+        }
+      }
+
     } else {
-      std::cerr << "Failed to delete aircraft with abstract ID " << abstractId
-                << ".\n";
+      std::cerr << "Failed to delete aircraft #" << abstractId << ".\n";
     }
   }
 
@@ -125,10 +125,13 @@ class AircraftMenu {
       int abstractCarrierId = aircraft.getCarrierId();
       std::string manufacturer = aircraft.getManufacturer();
       int capacity = aircraft.getCapacity();
+      std::string carrierName;
+      carrierGateway.getCarrier(carrierIdMapper->getRealId(abstractCarrierId),
+                                carrierName);
 
-      std::cout << "Abstract ID: " << abstractId << "\n";
-      std::cout << "Aircraft Type: " << aircraftType << "\n";
-      std::cout << "Carrier ID: " << abstractCarrierId << "\n";
+      std::cout << "#" << abstractId << "\n";
+      std::cout << "Model: " << aircraftType << "\n";
+      std::cout << "Carrier : " << carrierName << "\n";
       std::cout << "Manufacturer: " << manufacturer << "\n";
       std::cout << "Capacity: " << capacity << "\n";
       std::cout << "\n";
@@ -137,21 +140,20 @@ class AircraftMenu {
 
   void updateAircraft() {
     int abstractId;
-    std::cout << "Enter the abstract ID of the aircraft you want to update: \n";
+    std::cout << "Enter number of the aircraft you want to update: \n";
     std::cin >> abstractId;
 
     if (!aircraftIdMapper->getRealId(abstractId)) {
-      std::cerr << "Aircraft with abstract ID " << abstractId
-                << " does not exist.\n";
+      std::cerr << "Aircraft #" << abstractId << " does not exist.\n";
       return;
     }
 
     int realAircraftId = aircraftIdMapper->getRealId(abstractId);
-    std::cout << realAircraftId;
     std::string newAircraftType, newManufacturer;
+    std::string caId, capac;
     int newCarrierId, newCapacity;
 
-    std::cout << "Enter new aircraft type (or press Enter to keep the current "
+    std::cout << "Enter new aircraft model (or press Enter to keep the current "
                  "value): \n";
     std::cin.ignore();
     std::getline(std::cin, newAircraftType);
@@ -161,10 +163,25 @@ class AircraftMenu {
     std::getline(std::cin, newManufacturer);
     std::cout
         << "Enter new capacity (or press Enter to keep the current value): \n";
-    std::cin >> newCapacity;
-    std::cout << "Enter new carrier ID (or press Enter to keep the current "
+
+    std::getline(std::cin, capac);
+    newCapacity = std::stoi(capac);
+
+    CarrierMenu::displayAllCarriers(*carrierIdMapper);
+    std::cout << "Enter new carrier number (or press Enter to keep the current "
                  "value): \n";
-    std::cin >> newCarrierId;
+    std::getline(std::cin, caId);
+    newCarrierId = std::stoi(caId);
+    if (!CarrierMenu::isCarrierIdValid(newCarrierId, *carrierIdMapper)) {
+      std::cerr << "Carrier #" << newCarrierId << " does not exist.\n";
+      if (CarrierMenu::displayAllCarriers(*carrierIdMapper)) {
+        std::cout << "Please choose an existing carrier.\n";
+        return;
+      } else {
+        std::cerr << "No carriers available. Cannot proceed.\n";
+        return;
+      }
+    }
 
     for (Aircraft &aircraft : aircraftIdMapper->aircraftVector) {
       if (aircraft.getId() == aircraftIdMapper->getAbstractId(realAircraftId)) {
@@ -195,11 +212,9 @@ class AircraftMenu {
     if (aircraftGateway.updateAircraft(realAircraftId, newAircraftType,
                                        carrierIdMapper->getRealId(newCarrierId),
                                        newManufacturer, newCapacity)) {
-      std::cout << "Aircraft with abstract ID " << abstractId
-                << " updated successfully.\n";
+      std::cout << "Aircraft #" << abstractId << " updated successfully.\n";
     } else {
-      std::cerr << "Failed to update aircraft with abstract ID " << abstractId
-                << ".\n";
+      std::cerr << "Failed to update aircraft #" << abstractId << ".\n";
     }
   }
 
@@ -221,9 +236,9 @@ class AircraftMenu {
 
     std::cout << "Available Aircraft:\n";
     for (const Aircraft &aircraft : idMapper.aircraftVector) {
-      std::cout << "Abstract ID: " << aircraft.getId() << "\n";
+      std::cout << "#" << aircraft.getId() << "\n";
       std::cout << "Aircraft Type: " << aircraft.getAircraftType() << "\n";
-      std::cout << "Carrier ID: " << aircraft.getCarrierId() << "\n";
+      std::cout << "Carrier number: " << aircraft.getCarrierId() << "\n";
       std::cout << "Manufacturer: " << aircraft.getManufacturer() << "\n";
       std::cout << "Capacity: " << aircraft.getCapacity() << "\n";
       std::cout << "\n";
@@ -235,4 +250,5 @@ class AircraftMenu {
   AircraftGateway &aircraftGateway;
   AircraftIdMapper *aircraftIdMapper;
   CarrierIdMapper *carrierIdMapper;
+  CarrierGateway &carrierGateway;
 };

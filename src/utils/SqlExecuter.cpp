@@ -22,13 +22,14 @@ bool SqlExecuter::executeSQL(const std::string& sqlQuery) {
 
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
     std::cerr << "SQL query execution failed." << std::endl;
+    std::cout << sqlQuery;
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return false;
   }
 
   SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
 
-    return true;
+  return true;
 }
 
 bool SqlExecuter::executeSQLWithResults(const std::string& sqlQuery,
@@ -45,6 +46,7 @@ bool SqlExecuter::executeSQLWithResults(const std::string& sqlQuery,
 
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
     std::cerr << "SQL query execution failed." << std::endl;
+    std::cout << sqlQuery;
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return false;
   }

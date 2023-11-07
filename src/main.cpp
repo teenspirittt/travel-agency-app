@@ -3,6 +3,7 @@
 #include "./gateways/AircraftGateway.h"
 #include "./gateways/CarrierGateway.h"
 #include "./gateways/ClientGateway.h"
+#include "./gateways/ClientRouteGateway.h"
 #include "./gateways/EmployeeGateway.h"
 #include "./gateways/EmployeeTransfersGateway.h"
 #include "./gateways/FlightsGateway.h"
@@ -18,6 +19,7 @@
 #include "./utils/CarrierMenu.h"
 #include "./utils/ClientIdMapper.h"
 #include "./utils/ClientMenu.h"
+#include "./utils/ClientRouteMenu.h"
 #include "./utils/DataBaseConnector.h"
 #include "./utils/DataBaseInitializer.h"
 #include "./utils/EmployeeIdMapper.h"
@@ -66,8 +68,9 @@ int main() {
     EmployeeGateway employeeGateway;
     EmployeeTransfersGateway transferGateway;
     RouteGateway routeGateway;
+    ClientRouteGateway clientRouteGateway;
 
-    AircraftMenu aircraftMenu(aircraftGateway);
+    AircraftMenu aircraftMenu(aircraftGateway, carrierGateway);
     CarrierMenu carrierMenu(carrierGateway);
     FlightMenu flightMenu(flightsGateway);
     HotelMenu hotelMenu(hotelGateway);
@@ -180,7 +183,6 @@ int main() {
     if (transferGateway.getAllTransfers(transferData)) {
       for (const auto &tuple : transferData) {
         int realId = std::get<0>(tuple);
-        std::cout << realId << " real id\n";
         transferIdMapper.addMapping(transferIdMapper.generateNextAbstractId(),
                                     realId);
         EmployeeTransfers transfer(
@@ -199,7 +201,6 @@ int main() {
     if (routeGateway.getAllRoutes(routeData)) {
       for (const auto &tuple : routeData) {
         int realId = std::get<0>(tuple);
-        std::cout << realId << " real id\n";
         routeIdMapper.addMapping(routeIdMapper.generateNextAbstractId(),
                                  realId);
         Route route(routeIdMapper.getAbstractId(realId), std::get<1>(tuple),
@@ -212,9 +213,25 @@ int main() {
       }
     }
 
+    std::vector<std::pair<int, int>> clientRoutes;
+    std::vector<ClientRoute> clientRouteObjects;
+    if (clientRouteGateway.getAllClientRoutes(clientRoutes)) {
+      for (const auto &clientRouteData : clientRoutes) {
+        int clientId = clientRouteData.first;
+        int routeId = clientRouteData.second;
+
+        ClientRoute clientRoute(clientIdMapper.getAbstractId(clientId),
+                                routeIdMapper.getAbstractId(routeId));
+
+        // Добавляем объект в вектор
+        clientRouteObjects.push_back(clientRoute);
+      }
+    }
+    ClientRouteMenu clientRouteMenu(clientRouteGateway, clientRouteObjects);
+
     int choice;
     do {
-      std::cout << "\n\nMain Menu:\n";
+      std::cout << "\n\nMain  Menu:\n";
       std::cout << "1. Aircraft Menu\n";
       std::cout << "2. Carrier Menu\n";
       std::cout << "3. Client Route Menu\n";
@@ -234,6 +251,9 @@ int main() {
           break;
         case 2:
           carrierMenu.displayMenu();
+          break;
+        case 3:
+          clientRouteMenu.displayMenu();
           break;
         case 4:
           clientMenu.displayMenu();

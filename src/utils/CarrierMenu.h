@@ -65,17 +65,17 @@ class CarrierMenu {
     std::cout << "Insert ID to delete\n";
     std::cin >> abstractId;
 
-    for (auto it = carrierIdMapper->carrierVector.begin();
-         it != carrierIdMapper->carrierVector.end(); ++it) {
-      if (it->getId() == abstractId) {
-        carrierIdMapper->carrierVector.erase(it);
-        break;
-      }
-    }
-
     if (carrierGateway.deleteCarrier(carrierIdMapper->getRealId(abstractId))) {
       std::cout << "Carrier with abstract ID " << abstractId
                 << " deleted successfully.\n";
+
+      for (auto it = carrierIdMapper->carrierVector.begin();
+           it != carrierIdMapper->carrierVector.end(); ++it) {
+        if (it->getId() == abstractId) {
+          carrierIdMapper->carrierVector.erase(it);
+          break;
+        }
+      }
     } else {
       std::cerr << "Failed to delete carrier with abstract ID " << abstractId
                 << ".\n";

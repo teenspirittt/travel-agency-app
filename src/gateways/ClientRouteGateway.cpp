@@ -6,21 +6,32 @@ ClientRouteGateway::ClientRouteGateway() {
 }
 
 bool ClientRouteGateway::insertClientRoute(int clientId, int routeId) {
-  std::string query = "INSERT INTO ClientRoute (client_id, route_id) VALUES (" +
-                      std::to_string(clientId) + ", " +
-                      std::to_string(routeId) + ")";
+  std::string query =
+      "INSERT INTO Client_Route (client_id, route_id) VALUES (" +
+      std::to_string(clientId) + ", " + std::to_string(routeId) + ")";
   return sqlExecuter->executeSQL(query);
 }
 
 bool ClientRouteGateway::deleteClientRoute(int clientId, int routeId) {
   std::string query =
-      "DELETE FROM ClientRoute WHERE client_id = " + std::to_string(clientId) +
+      "DELETE FROM Client_Route WHERE client_id = " + std::to_string(clientId) +
       " AND route_id = " + std::to_string(routeId);
   return sqlExecuter->executeSQL(query);
 }
 
+bool ClientRouteGateway::updateClientRoute(int clientId, int routeId,
+                                           int newCID, int newRID) {
+  std::string query =
+      "UPDATE Client_Route SET client_id =" + std::to_string(clientId) +
+      ", route_id = " + std::to_string(routeId) +
+      " WHERE client_id =  " + std::to_string(newCID) +
+      " AND route id =" + std::to_string(newRID);
+
+  return sqlExecuter->executeSQL(query);
+}
+
 bool ClientRouteGateway::getClientRoute(int clientId, int routeId) {
-  std::string query = "SELECT * FROM ClientRoute WHERE client_id = " +
+  std::string query = "SELECT * FROM Client_Route WHERE client_id = " +
                       std::to_string(clientId) +
                       " AND route_id = " + std::to_string(routeId);
   SQLHSTMT hstmt;
@@ -37,7 +48,7 @@ bool ClientRouteGateway::getClientRoute(int clientId, int routeId) {
 
 bool ClientRouteGateway::getAllClientRoutes(
     std::vector<std::pair<int, int>> &clientRoutePairs) {
-  std::string query = "SELECT client_id, route_id FROM ClientRoute";
+  std::string query = "SELECT client_id, route_id FROM Client_Route";
   SQLHSTMT hstmt;
 
   if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
@@ -60,7 +71,7 @@ bool ClientRouteGateway::getAllClientRoutes(
 
 bool ClientRouteGateway::findRoutesByClient(
     int clientId, std::vector<int> &matchingRouteIds) {
-  std::string query = "SELECT route_id FROM ClientRoute WHERE client_id = " +
+  std::string query = "SELECT route_id FROM Client_Route WHERE client_id = " +
                       std::to_string(clientId);
   SQLHSTMT hstmt;
 

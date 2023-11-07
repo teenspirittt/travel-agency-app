@@ -104,17 +104,16 @@ class FlightMenu {
     std::cout << "Insert id to delete\n";
     std::cin >> abstractId;
 
-    for (auto it = flightIdMapper->flightVector.begin();
-         it != flightIdMapper->flightVector.end(); ++it) {
-      if (it->getId() == abstractId) {
-        flightIdMapper->flightVector.erase(it);
-        break;
-      }
-    }
-
     if (flightGateway.deleteFlight(flightIdMapper->getRealId(abstractId))) {
       std::cout << "Flight with abstract ID " << abstractId
                 << " deleted successfully.\n";
+      for (auto it = flightIdMapper->flightVector.begin();
+           it != flightIdMapper->flightVector.end(); ++it) {
+        if (it->getId() == abstractId) {
+          flightIdMapper->flightVector.erase(it);
+          break;
+        }
+      }
     } else {
       std::cerr << "Failed to delete flight with abstract ID " << abstractId
                 << ".\n";

@@ -85,18 +85,17 @@ class EmployeeMenu {
     std::cout << "Insert ID to delete\n";
     std::cin >> abstractId;
 
-    for (auto it = employeeIdMapper->employeeVector.begin();
-         it != employeeIdMapper->employeeVector.end(); ++it) {
-      if (it->getId() == abstractId) {
-        employeeIdMapper->employeeVector.erase(it);
-        break;
-      }
-    }
-
     if (employeeGateway.deleteEmployee(
             employeeIdMapper->getRealId(abstractId))) {
       std::cout << "Employee with abstract ID " << abstractId
                 << " deleted successfully.\n";
+      for (auto it = employeeIdMapper->employeeVector.begin();
+           it != employeeIdMapper->employeeVector.end(); ++it) {
+        if (it->getId() == abstractId) {
+          employeeIdMapper->employeeVector.erase(it);
+          break;
+        }
+      }
     } else {
       std::cerr << "Failed to delete employee with abstract ID " << abstractId
                 << ".\n";

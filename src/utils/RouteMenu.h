@@ -143,17 +143,16 @@ class RouteMenu {
     std::cout << "Insert ID to delete\n";
     std::cin >> abstractId;
 
-    for (auto it = routeIdMapper->routeVector.begin();
-         it != routeIdMapper->routeVector.end(); ++it) {
-      if (it->getId() == abstractId) {
-        routeIdMapper->routeVector.erase(it);
-        break;
-      }
-    }
-
     if (routeGateway.deleteRoute(routeIdMapper->getRealId(abstractId))) {
       std::cout << "Route with abstract ID " << abstractId
                 << " deleted successfully.\n";
+      for (auto it = routeIdMapper->routeVector.begin();
+           it != routeIdMapper->routeVector.end(); ++it) {
+        if (it->getId() == abstractId) {
+          routeIdMapper->routeVector.erase(it);
+          break;
+        }
+      }
     } else {
       std::cerr << "Failed to delete route with abstract ID " << abstractId
                 << ".\n";
@@ -354,6 +353,29 @@ class RouteMenu {
     } else {
       std::cerr << "Failed to update route with ID " << routeId << ".\n";
     }
+  }
+
+  static bool isRouteIdValid(int routeId, const RouteIdMapper& idMapper) {
+    for (const Route& route : idMapper.routeVector) {
+      if (route.getId() == routeId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static bool displayAllRoutes(const RouteIdMapper& idMapper) {
+    if (idMapper.routeVector.empty()) {
+      std::cerr << "No routes available. Cannot proceed.\n";
+      return false;
+    }
+
+    std::cout << "Available Routes:\n";
+    for (const Route& route : idMapper.routeVector) {
+      std::cout << "{id=" << route.getId() << "; name=\"" << route.getName()
+                << "\"}\n";
+    }
+    return true;
   }
 
  private:

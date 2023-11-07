@@ -76,17 +76,17 @@ class HotelMenu {
     std::cout << "Insert ID to delete\n";
     std::cin >> abstractId;
 
-    for (auto it = hotelIdMapper->hotelVector.begin();
-         it != hotelIdMapper->hotelVector.end(); ++it) {
-      if (it->getId() == abstractId) {
-        hotelIdMapper->hotelVector.erase(it);
-        break;
-      }
-    }
-
     if (hotelGateway.deleteHotel(hotelIdMapper->getRealId(abstractId))) {
       std::cout << "Hotel with abstract ID " << abstractId
                 << " deleted successfully.\n";
+
+      for (auto it = hotelIdMapper->hotelVector.begin();
+           it != hotelIdMapper->hotelVector.end(); ++it) {
+        if (it->getId() == abstractId) {
+          hotelIdMapper->hotelVector.erase(it);
+          break;
+        }
+      }
     } else {
       std::cerr << "Failed to delete hotel with abstract ID " << abstractId
                 << ".\n";

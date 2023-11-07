@@ -77,17 +77,16 @@ class ClientMenu {
     std::cout << "Insert ID to delete\n";
     std::cin >> abstractId;
 
-    for (auto it = clientIdMapper->clientVector.begin();
-         it != clientIdMapper->clientVector.end(); ++it) {
-      if (it->getId() == abstractId) {
-        clientIdMapper->clientVector.erase(it);
-        break;
-      }
-    }
-
     if (clientGateway.deleteClient(clientIdMapper->getRealId(abstractId))) {
       std::cout << "Client with abstract ID " << abstractId
                 << " deleted successfully.\n";
+      for (auto it = clientIdMapper->clientVector.begin();
+           it != clientIdMapper->clientVector.end(); ++it) {
+        if (it->getId() == abstractId) {
+          clientIdMapper->clientVector.erase(it);
+          break;
+        }
+      }
     } else {
       std::cerr << "Failed to delete client with abstract ID " << abstractId
                 << ".\n";
@@ -176,6 +175,29 @@ class ClientMenu {
       std::cerr << "Failed to update client with abstract ID " << abstractId
                 << ".\n";
     }
+  }
+
+  static bool isClientIdValid(int clientId, const ClientIdMapper &idMapper) {
+    for (const Clients &client : idMapper.clientVector) {
+      if (client.getId() == clientId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static bool displayAllClients(const ClientIdMapper &idMapper) {
+    if (idMapper.clientVector.empty()) {
+      std::cerr << "No clients available. Cannot proceed.\n";
+      return false;
+    }
+
+    std::cout << "Available Clients:\n";
+    for (const Clients &client : idMapper.clientVector) {
+      std::cout << "{id=" << client.getId() << "; name=\""
+                << client.getFullName() << "\"}\n";
+    }
+    return true;
   }
 
  private:

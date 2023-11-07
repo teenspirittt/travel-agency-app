@@ -18,6 +18,7 @@ class ClientRouteGateway {
   bool getClientRoute(int clientId, int routeId);
   bool getAllClientRoutes(std::vector<std::pair<int, int>> &clientRoutePairs);
   bool findRoutesByClient(int clientId, std::vector<int> &matchingRouteIds);
+  bool updateClientRoute(int clientId, int routeId, int newCID, int newRID);
 
  private:
   DataBaseConnector *dbConnector;
