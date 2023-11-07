@@ -72,11 +72,11 @@ int main() {
 
     AircraftMenu aircraftMenu(aircraftGateway, carrierGateway);
     CarrierMenu carrierMenu(carrierGateway);
-    FlightMenu flightMenu(flightsGateway);
+    FlightMenu flightMenu(flightsGateway, aircraftGateway);
     HotelMenu hotelMenu(hotelGateway);
     ClientMenu clientMenu(clientGateway);
     EmployeeMenu employeeMenu(employeeGateway);
-    EmployeeTransferMenu transferMenu(transferGateway);
+    EmployeeTransferMenu transferMenu(transferGateway, employeeGateway);
     RouteMenu routeMenu(routeGateway);
 
     std::vector<std::tuple<int, std::string>> carrierData;
@@ -222,8 +222,6 @@ int main() {
 
         ClientRoute clientRoute(clientIdMapper.getAbstractId(clientId),
                                 routeIdMapper.getAbstractId(routeId));
-
-        // Добавляем объект в вектор
         clientRouteObjects.push_back(clientRoute);
       }
     }
@@ -231,7 +229,7 @@ int main() {
 
     int choice;
     do {
-      std::cout << "\n\nMain  Menu:\n";
+      std::cout << "\n\nMain Menu:\n";
       std::cout << "1. Aircraft Menu\n";
       std::cout << "2. Carrier Menu\n";
       std::cout << "3. Client Route Menu\n";

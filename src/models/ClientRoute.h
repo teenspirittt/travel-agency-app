@@ -6,6 +6,8 @@ class ClientRoute {
   ClientRoute(int clientId, int routeId)
       : clientId(clientId), routeId(routeId) {}
 
+  ClientRoute(){};
+
   int getClientId() const { return clientId; }
   int getRouteId() const { return routeId; }
 

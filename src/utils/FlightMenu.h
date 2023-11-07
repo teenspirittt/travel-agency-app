@@ -11,7 +11,8 @@
 
 class FlightMenu {
  public:
-  explicit FlightMenu(FlightsGateway &fGateway) : flightGateway(fGateway) {
+  explicit FlightMenu(FlightsGateway &fGateway, AircraftGateway &aGateway)
+      : flightGateway(fGateway), aircraftGateway(aGateway) {
     flightIdMapper = &FlightIdMapper::getInstance();
     carrierIdMapper = &CarrierIdMapper::getInstance();
     aircraftIdMapper = &AircraftIdMapper::getInstance();
@@ -61,14 +62,14 @@ class FlightMenu {
     std::cout << "Insert departure date: (required string)\n";
     std::getline(std::cin, departureDate);
 
-    std::cout << "Insert aircraft ID: (required int)\n";
+    std::cout << "Insert aircraft # (required int)\n";
     AircraftMenu::displayAllAircraft(*aircraftIdMapper);
     std::cin >> aircraftId;
 
     if (!AircraftMenu::isAircraftIdValid(aircraftId, *aircraftIdMapper)) {
-      std::cerr << "Aircraft with ID " << aircraftId << " does not exist.\n";
+      std::cerr << "Aircraft #" << aircraftId << " does not exist.\n";
       if (AircraftMenu::displayAllAircraft(*aircraftIdMapper)) {
-        std::cout << "Please choose an existing aircraft ID.\n";
+        std::cout << "Please choose an existing aircraft.\n";
         return;
       } else {
         std::cerr << "No aircraft available. Cannot proceed.\n";
@@ -101,12 +102,11 @@ class FlightMenu {
 
   void deleteFlight() {
     int abstractId;
-    std::cout << "Insert id to delete\n";
+    std::cout << "Insert number to delete\n";
     std::cin >> abstractId;
 
     if (flightGateway.deleteFlight(flightIdMapper->getRealId(abstractId))) {
-      std::cout << "Flight with abstract ID " << abstractId
-                << " deleted successfully.\n";
+      std::cout << "Flight #" << abstractId << " deleted successfully.\n";
       for (auto it = flightIdMapper->flightVector.begin();
            it != flightIdMapper->flightVector.end(); ++it) {
         if (it->getId() == abstractId) {
@@ -115,18 +115,17 @@ class FlightMenu {
         }
       }
     } else {
-      std::cerr << "Failed to delete flight with abstract ID " << abstractId
-                << ".\n";
+      std::cerr << "Failed to delete flight #" << abstractId << ".\n";
     }
   }
 
   void updateFlight() {
     int flightId;
-    std::cout << "Enter the ID of the flight you want to update: ";
+    std::cout << "Enter the number of the flight you want to update: ";
     std::cin >> flightId;
 
     if (!flightIdMapper->getRealId(flightId)) {
-      std::cerr << "Flight with ID " << flightId << " does not exist.\n";
+      std::cerr << "Flight #" << flightId << " does not exist.\n";
       return;
     }
 
@@ -149,8 +148,8 @@ class FlightMenu {
                  "value): ";
     std::getline(std::cin, newFlightClass);
 
-    std::cout
-        << "Enter new aircraft ID (or press Enter to keep the current value): ";
+    std::cout << "Enter new aircraft number (or press Enter to keep the "
+                 "current value): ";
     std::string newAircraftIdInput;
     std::getline(std::cin, newAircraftIdInput);
 
@@ -158,8 +157,8 @@ class FlightMenu {
       try {
         newAircraftId = std::stoi(newAircraftIdInput);
       } catch (const std::invalid_argument &e) {
-        std::cerr
-            << "Invalid input for aircraft ID. Please enter a valid integer.\n";
+        std::cerr << "Invalid input for aircraft number. Please enter a valid "
+                     "integer.\n";
         return;
       }
     }
@@ -218,9 +217,9 @@ class FlightMenu {
             realFlightId, newFlightNumber, newDepartureDate,
             aircraftIdMapper->getRealId(newAircraftId), newFlightClass,
             newAvailableSeats, newCarrierId)) {
-      std::cout << "Flight with ID " << flightId << " updated successfully.\n";
+      std::cout << "Flight #" << flightId << " updated successfully.\n";
     } else {
-      std::cerr << "Failed to update flight with ID " << flightId << ".\n";
+      std::cerr << "Failed to update flight #" << flightId << ".\n";
     }
   }
 
@@ -235,10 +234,19 @@ class FlightMenu {
       std::string flightClass = flight.getFlightClass();
       int availableSeats = flight.getAvailableSeats();
 
-      std::cout << "Abstract ID: " << abstractId << "\n";
+      std::string aircraftType;
+      int carrierId;
+      std::string manufacturer;
+      int capacity;
+
+      aircraftGateway.getAircraft(
+          aircraftIdMapper->getRealId(abstractAircraftId), aircraftType,
+          carrierId, manufacturer, capacity);
+
+      std::cout << "#" << abstractId << "\n";
       std::cout << "Flight Number: " << flightNumber << "\n";
       std::cout << "Departure Date: " << departureDate << "\n";
-      std::cout << "Aircraft ID: " << abstractAircraftId << "\n";
+      std::cout << "Aircraft model: " << aircraftType << "\n";
       std::cout << "Flight Class: " << flightClass << "\n";
       std::cout << "Available Seats: " << availableSeats << "\n";
       std::cout << "\n";
@@ -262,7 +270,7 @@ class FlightMenu {
 
     std::cout << "Available Flights:\n";
     for (const Flights &flight : idMapper.flightVector) {
-      std::cout << "{id=" << flight.getId() << "; flight_number=\""
+      std::cout << "{#" << flight.getId() << "; flight_number=\""
                 << flight.getFlightNumber() << "; available_seats=\""
                 << flight.getAvailableSeats() << "\"}\n";
     }
@@ -271,6 +279,7 @@ class FlightMenu {
 
  private:
   FlightsGateway &flightGateway;
+  AircraftGateway &aircraftGateway;
   FlightIdMapper *flightIdMapper;
   AircraftIdMapper *aircraftIdMapper;
   CarrierIdMapper *carrierIdMapper;

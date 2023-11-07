@@ -82,13 +82,12 @@ class EmployeeMenu {
 
   void deleteEmployee() {
     int abstractId;
-    std::cout << "Insert ID to delete\n";
+    std::cout << "Insert number to delete\n";
     std::cin >> abstractId;
 
     if (employeeGateway.deleteEmployee(
             employeeIdMapper->getRealId(abstractId))) {
-      std::cout << "Employee with abstract ID " << abstractId
-                << " deleted successfully.\n";
+      std::cout << "Employee #" << abstractId << " deleted successfully.\n";
       for (auto it = employeeIdMapper->employeeVector.begin();
            it != employeeIdMapper->employeeVector.end(); ++it) {
         if (it->getId() == abstractId) {
@@ -97,8 +96,7 @@ class EmployeeMenu {
         }
       }
     } else {
-      std::cerr << "Failed to delete employee with abstract ID " << abstractId
-                << ".\n";
+      std::cerr << "Failed to delete employee #" << abstractId << ".\n";
     }
   }
 
@@ -113,7 +111,7 @@ class EmployeeMenu {
       std::string position = employee.getPosition();
       double salary = employee.getSalary();
 
-      std::cout << "Abstract ID: " << abstractId << "\n";
+      std::cout << "#" << abstractId << "\n";
       std::cout << "Full Name: " << fullName << "\n";
       std::cout << "Address: " << address << "\n";
       std::cout << "Date of Birth: " << dateOfBirth << "\n";
@@ -141,7 +139,7 @@ class EmployeeMenu {
 
     std::cout << "Available Employees:\n";
     for (const Employees& employee : idMapper.employeeVector) {
-      std::cout << "{id=" << employee.getId() << "; name=\""
+      std::cout << "{#" << employee.getId() << "; name=\""
                 << employee.getFullName() << "\"}\n";
     }
     return true;
@@ -149,12 +147,11 @@ class EmployeeMenu {
 
   void updateEmployee() {
     int abstractId;
-    std::cout << "Enter the ID of the employee you want to update: ";
+    std::cout << "Enter the number of the employee you want to update: ";
     std::cin >> abstractId;
 
     if (!employeeIdMapper->getRealId(abstractId)) {
-      std::cerr << "Employee with abstract ID " << abstractId
-                << " does not exist.\n";
+      std::cerr << "Employee #" << abstractId << " does not exist.\n";
       return;
     }
 
@@ -222,11 +219,9 @@ class EmployeeMenu {
     if (employeeGateway.updateEmployee(realEmployeeId, newFullName, newAddress,
                                        newDateOfBirth, newPosition,
                                        newSalary)) {
-      std::cout << "Employee with abstract ID " << abstractId
-                << " updated successfully.\n";
+      std::cout << "Employee #" << abstractId << " updated successfully.\n";
     } else {
-      std::cerr << "Failed to update employee with abstract ID " << abstractId
-                << ".\n";
+      std::cerr << "Failed to update employee #" << abstractId << ".\n";
     }
   }
 

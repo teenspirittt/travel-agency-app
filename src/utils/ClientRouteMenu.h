@@ -126,7 +126,7 @@ class ClientRouteMenu {
     std::cout << "Enter the number of the client: ";
     std::cin >> newClientId;
 
-    std::cout << "Enter the new ID of the client: ";
+    std::cout << "Enter the number of the client: ";
     std::cin >> newRouteId;
 
     for (ClientRoute& croute : clientRouteObjects) {

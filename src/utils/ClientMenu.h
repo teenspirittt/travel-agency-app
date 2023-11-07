@@ -74,12 +74,11 @@ class ClientMenu {
 
   void deleteClient() {
     int abstractId;
-    std::cout << "Insert ID to delete\n";
+    std::cout << "Insert number to delete\n";
     std::cin >> abstractId;
 
     if (clientGateway.deleteClient(clientIdMapper->getRealId(abstractId))) {
-      std::cout << "Client with abstract ID " << abstractId
-                << " deleted successfully.\n";
+      std::cout << "Client #" << abstractId << " deleted successfully.\n";
       for (auto it = clientIdMapper->clientVector.begin();
            it != clientIdMapper->clientVector.end(); ++it) {
         if (it->getId() == abstractId) {
@@ -103,7 +102,7 @@ class ClientMenu {
       std::string orderDate = client.getOrderDate();
       std::string seat = client.getSeat();
 
-      std::cout << "Abstract ID: " << abstractId << "\n";
+      std::cout << "#" << abstractId << "\n";
       std::cout << "Full Name: " << fullName << "\n";
       std::cout << "Phone: " << phone << "\n";
       std::cout << "Order Date: " << orderDate << "\n";
@@ -114,12 +113,11 @@ class ClientMenu {
 
   void updateClient() {
     int abstractId;
-    std::cout << "Enter the ID of the client you want to update: ";
+    std::cout << "Enter the number of the client you want to update: ";
     std::cin >> abstractId;
 
     if (!clientIdMapper->getRealId(abstractId)) {
-      std::cerr << "Client with abstract ID " << abstractId
-                << " does not exist.\n";
+      std::cerr << "Client #" << abstractId << " does not exist.\n";
       return;
     }
 
@@ -169,11 +167,9 @@ class ClientMenu {
 
     if (clientGateway.updateClient(realClientId, newFullName, newPhone,
                                    newOrderDate, newSeat)) {
-      std::cout << "Client with abstract ID " << abstractId
-                << " updated successfully.\n";
+      std::cout << "Client #" << abstractId << " updated successfully.\n";
     } else {
-      std::cerr << "Failed to update client with abstract ID " << abstractId
-                << ".\n";
+      std::cerr << "Failed to update client #" << abstractId << ".\n";
     }
   }
 
@@ -194,8 +190,8 @@ class ClientMenu {
 
     std::cout << "Available Clients:\n";
     for (const Clients &client : idMapper.clientVector) {
-      std::cout << "{id=" << client.getId() << "; name=\""
-                << client.getFullName() << "\"}\n";
+      std::cout << "{#" << client.getId() << "; name=\"" << client.getFullName()
+                << "\"}\n";
     }
     return true;
   }

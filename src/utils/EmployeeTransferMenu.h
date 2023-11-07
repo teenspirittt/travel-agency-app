@@ -1,6 +1,7 @@
 #ifndef RPBD_EMPLOYEETRANSFERMENU_H
 #define RPBD_EMPLOYEETRANSFERMENU_H
 
+#include "../gateways/EmployeeGateway.h"
 #include "../gateways/EmployeeTransfersGateway.h"
 #include "../models/EmployeeTransfers.h"
 #include "../utils/EmployeeMenu.h"
@@ -8,8 +9,9 @@
 
 class EmployeeTransferMenu {
  public:
-  explicit EmployeeTransferMenu(EmployeeTransfersGateway& etGateway)
-      : employeeTransferGateway(etGateway) {
+  explicit EmployeeTransferMenu(EmployeeTransfersGateway& etGateway,
+                                EmployeeGateway& eGateway)
+      : employeeTransferGateway(etGateway), employeeGateway(eGateway) {
     employeeTransfersIdMapper = &EmployeeTransfersIdMapper::getInstance();
     employeeIdMapper = &EmployeeIdMapper::getInstance();
   }
@@ -132,8 +134,18 @@ class EmployeeTransferMenu {
       std::string orderNumber = employeeTransfer.getOrderNumber();
       std::string orderDate = employeeTransfer.getOrderDate();
 
-      std::cout << "Abstract ID: " << abstractId << "\n";
-      std::cout << "Employee ID: " << employeeId << "\n";
+      std::string fullName;
+      std::string address;
+      std::string dateOfBirth;
+      std::string position;
+      double salary;
+
+      employeeGateway.getEmployee(employeeIdMapper->getRealId(employeeId),
+                                  fullName, address, dateOfBirth, position,
+                                  salary);
+
+      std::cout << "#" << abstractId << "\n";
+      std::cout << "Employee name: " << fullName << "\n";
       std::cout << "New Position: " << newPosition << "\n";
       std::cout << "Transfer Reason: " << transferReason << "\n";
       std::cout << "Order Number: " << orderNumber << "\n";
@@ -144,13 +156,12 @@ class EmployeeTransferMenu {
 
   void updateEmployeeTransfer() {
     int abstractId;
-    std::cout << "Enter the abstract ID of the employee transfer you want to "
+    std::cout << "Enter the number of the employee transfer you want to "
                  "update: \n";
     std::cin >> abstractId;
 
     if (!employeeTransfersIdMapper->getRealId(abstractId)) {
-      std::cerr << "Employee transfer with abstract ID " << abstractId
-                << " does not exist.\n";
+      std::cerr << "Employee #" << abstractId << " does not exist.\n";
       return;
     }
 
@@ -159,8 +170,9 @@ class EmployeeTransferMenu {
     int newEmployeeId;
     std::string newPosition, transferReason, orderNumber, orderDate;
 
-    std::cout << "Enter new employee ID (or press Enter to keep the current "
-                 "value): \n";
+    std::cout
+        << "Enter new employee number (or press Enter to keep the current "
+           "value): \n";
     std::cin >> newEmployeeId;
 
     if (!EmployeeMenu::isEmployeeIdValid(newEmployeeId, *employeeIdMapper)) {
@@ -227,11 +239,10 @@ class EmployeeTransferMenu {
     if (employeeTransferGateway.updateTransfer(
             realEmployeeTransferId, employeeIdMapper->getRealId(newEmployeeId),
             newPosition, transferReason, orderNumber, orderDate)) {
-      std::cout << "Employee transfer with abstract ID " << abstractId
+      std::cout << "Employee transfer #" << abstractId
                 << " updated successfully.\n";
     } else {
-      std::cerr << "Failed to update employee transfer with abstract ID "
-                << abstractId << ".\n";
+      std::cerr << "Failed to update employee #" << abstractId << ".\n";
     }
   }
 
@@ -239,6 +250,7 @@ class EmployeeTransferMenu {
   EmployeeTransfersGateway& employeeTransferGateway;
   EmployeeTransfersIdMapper* employeeTransfersIdMapper;
   EmployeeIdMapper* employeeIdMapper;
+  EmployeeGateway& employeeGateway;
 };
 
 #endif  // RPBD_EMPLOYEETRANSFERMENU_H

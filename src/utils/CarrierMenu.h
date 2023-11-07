@@ -66,8 +66,7 @@ class CarrierMenu {
     std::cin >> abstractId;
 
     if (carrierGateway.deleteCarrier(carrierIdMapper->getRealId(abstractId))) {
-      std::cout << "Carrier with abstract ID " << abstractId
-                << " deleted successfully.\n";
+      std::cout << "Carrier #" << abstractId << " deleted successfully.\n";
 
       for (auto it = carrierIdMapper->carrierVector.begin();
            it != carrierIdMapper->carrierVector.end(); ++it) {
@@ -89,7 +88,7 @@ class CarrierMenu {
       int abstractId = carrier.getId();
       std::string name = carrier.getName();
 
-      std::cout << "Abstract ID: " << abstractId << "\n";
+      std::cout << "#: " << abstractId << "\n";
       std::cout << "Name: " << name << "\n";
       std::cout << "\n";
     }
@@ -97,12 +96,11 @@ class CarrierMenu {
 
   void updateCarrier() {
     int abstractId;
-    std::cout << "Enter the ID of the carrier you want to update: ";
+    std::cout << "Enter the number of the carrier you want to update: ";
     std::cin >> abstractId;
 
     if (!carrierIdMapper->getRealId(abstractId)) {
-      std::cerr << "Carrier with abstract ID " << abstractId
-                << " does not exist.\n";
+      std::cerr << "Carrier #" << abstractId << " does not exist.\n";
       return;
     }
 
@@ -125,11 +123,9 @@ class CarrierMenu {
     }
 
     if (carrierGateway.updateCarrier(realCarrierId, newName)) {
-      std::cout << "Carrier with abstract ID " << abstractId
-                << " updated successfully.\n";
+      std::cout << "Carrier #" << abstractId << " updated successfully.\n";
     } else {
-      std::cerr << "Failed to update carrier with abstract ID " << abstractId
-                << ".\n";
+      std::cerr << "Failed to update carrier #" << abstractId << ".\n";
     }
   }
 
@@ -150,7 +146,7 @@ class CarrierMenu {
 
     std::cout << "Available Carriers:\n";
     for (const Carrier &carrier : idMapper.carrierVector) {
-      std::cout << "{id=" << carrier.getId() << "; name=\"" << carrier.getName()
+      std::cout << "{#" << carrier.getId() << "; name=\"" << carrier.getName()
                 << "\"}\n";
     }
     return true;
