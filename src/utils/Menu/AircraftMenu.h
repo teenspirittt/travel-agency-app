@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../gateways/AircraftGateway.h"
-#include "../gateways/CarrierGateway.h"
-#include "../models/Aircraft.h"
-#include "AircraftIdMapper.h"
-#include "CarrierIdMapper.h"
+#include "../../gateways/AircraftGateway.h"
+#include "../../gateways/CarrierGateway.h"
+#include "../../models/Aircraft.h"
+#include "../IdMapper/AircraftIdMapper.h"
+#include "../IdMapper/CarrierIdMapper.h"
 #include "CarrierMenu.h"
 
 class AircraftMenu {

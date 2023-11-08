@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "../models/Hotels.h"
+#include "../../models/Hotels.h"
 #include "IdMapper.h"
 
 class HotelIdMapper : public IdMapper {

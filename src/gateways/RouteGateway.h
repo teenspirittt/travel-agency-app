@@ -15,23 +15,17 @@ class RouteGateway {
   RouteGateway();
   bool insertRoute(const std::string &name, const std::string &country,
                    const std::string &city, int duration, int hotelId,
-                   int flightId, int employeeId,
-                   const std::string &agencyRepName,
-                   const std::string &agencyRepPhone);
+                   int flightId, int employeeId);
   bool deleteRoute(int routeId);
   bool getRoute(int routeId, std::string &name, std::string &country,
                 std::string &city, int &duration, int &hotelId, int &flightId,
-                int &employeeId, std::string &agencyRepName,
-                std::string &agencyRepPhone);
+                int &employeeId);
   bool updateRoute(int routeId, const std::string &name,
                    const std::string &country, const std::string &city,
-                   int duration, int hotelId, int flightId, int employeeId,
-                   const std::string &agencyRepName,
-                   const std::string &agencyRepPhone);
+                   int duration, int hotelId, int flightId, int employeeId);
   bool getAllRoutes(
       std::vector<std::tuple<int, std::string, std::string, std::string, int,
-                             int, int, int, std::string, std::string>>
-          &routeData);
+                             int, int, int>> &routeData);
   bool findRoutesByHotel(int hotelId, std::vector<int> &matchingRouteIds);
   bool findRoutesByEmployee(int employeeId, std::vector<int> &matchingRouteIds);
   bool findRoutesByCity(const std::string &city,

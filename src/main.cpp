@@ -13,24 +13,23 @@
 #include "./models/Carriers.h"
 #include "./models/EmployeeTransfers.h"
 #include "./models/Employees.h"
-#include "./utils/AircraftIdMapper.h"
-#include "./utils/AircraftMenu.h"
-#include "./utils/CarrierIdMapper.h"
-#include "./utils/CarrierMenu.h"
-#include "./utils/ClientIdMapper.h"
-#include "./utils/ClientMenu.h"
-#include "./utils/ClientRouteMenu.h"
-#include "./utils/DataBaseConnector.h"
 #include "./utils/DataBaseInitializer.h"
-#include "./utils/EmployeeIdMapper.h"
-#include "./utils/EmployeeMenu.h"
-#include "./utils/EmployeeTransferIdMapper.h"
-#include "./utils/EmployeeTransferMenu.h"
-#include "./utils/FlightMenu.h"
-#include "./utils/HotelIdMapper.h"
-#include "./utils/HotelMenu.h"
-#include "./utils/RouteIdMapper.h"
-#include "./utils/RouteMenu.h"
+#include "utils/IdMapper/AircraftIdMapper.h"
+#include "utils/IdMapper/CarrierIdMapper.h"
+#include "utils/IdMapper/ClientIdMapper.h"
+#include "utils/IdMapper/EmployeeIdMapper.h"
+#include "utils/IdMapper/EmployeeTransferIdMapper.h"
+#include "utils/IdMapper/HotelIdMapper.h"
+#include "utils/IdMapper/RouteIdMapper.h"
+#include "utils/Menu/AircraftMenu.h"
+#include "utils/Menu/CarrierMenu.h"
+#include "utils/Menu/ClientMenu.h"
+#include "utils/Menu/ClientRouteMenu.h"
+#include "utils/Menu/EmployeeMenu.h"
+#include "utils/Menu/EmployeeTransferMenu.h"
+#include "utils/Menu/FlightMenu.h"
+#include "utils/Menu/HotelMenu.h"
+#include "utils/Menu/RouteMenu.h"
 
 int main() {
   DataBaseConnector &dbConnector = DataBaseConnector::getInstance();
@@ -196,7 +195,7 @@ int main() {
 
     // init route map id
     std::vector<std::tuple<int, std::string, std::string, std::string, int, int,
-                           int, int, std::string, std::string>>
+                           int, int>>
         routeData;
     if (routeGateway.getAllRoutes(routeData)) {
       for (const auto &tuple : routeData) {
@@ -207,8 +206,7 @@ int main() {
                     std::get<2>(tuple), std::get<3>(tuple), std::get<4>(tuple),
                     hotelIdMapper.getAbstractId(std::get<5>(tuple)),
                     flightIdMapper.getAbstractId(std::get<6>(tuple)),
-                    employeeIdMapper.getAbstractId(std::get<7>(tuple)),
-                    std::get<8>(tuple), std::get<9>(tuple));
+                    employeeIdMapper.getAbstractId(std::get<7>(tuple)));
         routeIdMapper.routeVector.push_back(route);
       }
     }

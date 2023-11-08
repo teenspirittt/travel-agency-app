@@ -127,9 +127,7 @@ bool DataBaseInitializer::createTables() {
       "duration int,"
       "hotel_id int,"
       "flight_id int,"
-      "employee_id int,"
-      "agency_representative_name varchar(255),"
-      "agency_representative_phone varchar(20)"
+      "employee_id int"
       ");";
 
   std::string createClientsTable =

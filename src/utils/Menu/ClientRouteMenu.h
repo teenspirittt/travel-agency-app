@@ -3,11 +3,11 @@
 
 #include <algorithm>
 
-#include "../gateways/ClientRouteGateway.h"
-#include "../models/ClientRoute.h"
-#include "ClientIdMapper.h"
+#include "../../gateways/ClientRouteGateway.h"
+#include "../../models/ClientRoute.h"
+#include "../IdMapper/ClientIdMapper.h"
 #include "ClientMenu.h"
-#include "RouteIdMapper.h"
+#include "../IdMapper/RouteIdMapper.h"
 #include "RouteMenu.h"
 
 class ClientRouteMenu {

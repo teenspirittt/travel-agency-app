@@ -8,18 +8,14 @@ RouteGateway::RouteGateway() {
 bool RouteGateway::insertRoute(const std::string &name,
                                const std::string &country,
                                const std::string &city, int duration,
-                               int hotelId, int flightId, int employeeId,
-                               const std::string &agencyRepName,
-                               const std::string &agencyRepPhone) {
+                               int hotelId, int flightId, int employeeId) {
   std::string query =
       "INSERT INTO Route (name, country, city, duration, hotel_id, "
-      "flight_id, employee_id, agency_representative_name, "
-      "agency_representative_phone) "
+      "flight_id, employee_id) "
       "VALUES ('" +
       name + "', '" + country + "', '" + city + "', " +
       std::to_string(duration) + ", " + std::to_string(hotelId) + ", " +
-      std::to_string(flightId) + ", " + std::to_string(employeeId) + ", '" +
-      agencyRepName + "', '" + agencyRepPhone + "')";
+      std::to_string(flightId) + ", " + std::to_string(employeeId) + ")";
 
   return sqlExecuter->executeSQL(query);
 }
@@ -32,29 +28,24 @@ bool RouteGateway::deleteRoute(int routeId) {
 bool RouteGateway::updateRoute(int routeId, const std::string &name,
                                const std::string &country,
                                const std::string &city, int duration,
-                               int hotelId, int flightId, int employeeId,
-                               const std::string &agencyRepName,
-                               const std::string &agencyRepPhone) {
+                               int hotelId, int flightId, int employeeId) {
   std::string query = "UPDATE Route SET name = '" + name + "', country = '" +
                       country + "', city = '" + city +
                       "', duration = " + std::to_string(duration) +
                       ", hotel_id = " + std::to_string(hotelId) +
                       ", flight_id = " + std::to_string(flightId) +
                       ", employee_id = " + std::to_string(employeeId) +
-                      ", agency_representative_name = '" + agencyRepName +
-                      "', agency_representative_phone = '" + agencyRepPhone +
-                      "' WHERE id = " + std::to_string(routeId);
+                      " WHERE id = " + std::to_string(routeId);
 
   return sqlExecuter->executeSQL(query);
 }
 
 bool RouteGateway::getAllRoutes(
     std::vector<std::tuple<int, std::string, std::string, std::string, int, int,
-                           int, int, std::string, std::string>> &routeData) {
+                           int, int>> &routeData) {
   std::string query =
       "SELECT id, name, country, city, duration, hotel_id, flight_id, "
-      "employee_id, "
-      "agency_representative_name, agency_representative_phone FROM Route";
+      "employee_id FROM Route";
   SQLHSTMT hstmt;
 
   if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
@@ -64,8 +55,6 @@ bool RouteGateway::getAllRoutes(
       char nameBuffer[256];
       char countryBuffer[256];
       char cityBuffer[256];
-      char agency_representative_nameBuffer[256];
-      char agency_representative_phoneBuffer[256];
 
       ret = SQLFetch(hstmt);
       if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
@@ -80,23 +69,13 @@ bool RouteGateway::getAllRoutes(
         ret = SQLGetData(hstmt, 6, SQL_C_LONG, &hotel_id, 0, NULL);
         ret = SQLGetData(hstmt, 7, SQL_C_LONG, &flight_id, 0, NULL);
         ret = SQLGetData(hstmt, 8, SQL_C_LONG, &employee_id, 0, NULL);
-        ret = SQLGetData(hstmt, 9, SQL_C_CHAR, agency_representative_nameBuffer,
-                         sizeof(agency_representative_nameBuffer), NULL);
-        ret =
-            SQLGetData(hstmt, 10, SQL_C_CHAR, agency_representative_phoneBuffer,
-                       sizeof(agency_representative_phoneBuffer), NULL);
 
         std::string name(nameBuffer);
         std::string country(countryBuffer);
         std::string city(cityBuffer);
-        std::string agency_representative_name(
-            agency_representative_nameBuffer);
-        std::string agency_representative_phone(
-            agency_representative_phoneBuffer);
 
-        routeData.emplace_back(
-            id, name, country, city, duration, hotel_id, flight_id, employee_id,
-            agency_representative_name, agency_representative_phone);
+        routeData.emplace_back(id, name, country, city, duration, hotel_id,
+                               flight_id, employee_id);
       }
     }
 
@@ -110,11 +89,9 @@ bool RouteGateway::getAllRoutes(
 bool RouteGateway::getRoute(int routeId, std::string &name,
                             std::string &country, std::string &city,
                             int &duration, int &hotelId, int &flightId,
-                            int &employeeId, std::string &agencyRepName,
-                            std::string &agencyRepPhone) {
+                            int &employeeId) {
   std::string query =
-      "SELECT name, country, city, duration, hotel_id, flight_id, employee_id, "
-      "agency_representative_name, agency_representative_phone "
+      "SELECT name, country, city, duration, hotel_id, flight_id, employee_id "
       "FROM Route WHERE id = " +
       std::to_string(routeId);
 
@@ -122,8 +99,6 @@ bool RouteGateway::getRoute(int routeId, std::string &name,
   char nameBuffer[256];
   char countryBuffer[256];
   char cityBuffer[256];
-  char agencyRepNameBuffer[256];
-  char agencyRepPhoneBuffer[256];
 
   if (sqlExecuter->executeSQLWithResults(query, hstmt)) {
     SQLRETURN ret = SQL_SUCCESS;
@@ -141,16 +116,10 @@ bool RouteGateway::getRoute(int routeId, std::string &name,
       ret = SQLGetData(hstmt, 5, SQL_C_LONG, &hotelId, 0, NULL);
       ret = SQLGetData(hstmt, 6, SQL_C_LONG, &flightId, 0, NULL);
       ret = SQLGetData(hstmt, 7, SQL_C_LONG, &employeeId, 0, NULL);
-      ret = SQLGetData(hstmt, 8, SQL_C_CHAR, agencyRepNameBuffer,
-                       sizeof(agencyRepNameBuffer), &agencyRepNameLength);
-      ret = SQLGetData(hstmt, 9, SQL_C_CHAR, agencyRepPhoneBuffer,
-                       sizeof(agencyRepPhoneBuffer), &agencyRepPhoneLength);
 
       name = nameBuffer;
       country = countryBuffer;
       city = cityBuffer;
-      agencyRepName = agencyRepNameBuffer;
-      agencyRepPhone = agencyRepPhoneBuffer;
 
       SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
       return true;

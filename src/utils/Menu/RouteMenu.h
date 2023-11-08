@@ -1,17 +1,17 @@
 #ifndef RPBD_ROUTEMENU_H
 #define RPBD_ROUTEMENU_H
 
-#include "../gateways/RouteGateway.h"
-#include "../models/Employees.h"
-#include "../models/Hotels.h"
-#include "../models/Route.h"
-#include "EmployeeIdMapper.h"
+#include "../../gateways/RouteGateway.h"
+#include "../../models/Employees.h"
+#include "../../models/Hotels.h"
+#include "../../models/Route.h"
+#include "../IdMapper/EmployeeIdMapper.h"
+#include "../IdMapper/FlightIdMapper.h"
+#include "../IdMapper/HotelIdMapper.h"
+#include "../IdMapper/RouteIdMapper.h"
 #include "EmployeeMenu.h"
-#include "FlightIdMapper.h"
 #include "FlightMenu.h"
-#include "HotelIdMapper.h"
 #include "HotelMenu.h"
-#include "RouteIdMapper.h"
 
 class RouteMenu {
  public:
@@ -57,7 +57,7 @@ class RouteMenu {
   }
 
   void insertRoute() {
-    std::string name, country, city, agencyRepName, agencyRepPhone;
+    std::string name, country, city;
     int duration, hotelId, flightId, employeeId;
 
     std::cout << "Insert route name: (required string)\n";
@@ -116,21 +116,13 @@ class RouteMenu {
       }
     }
 
-    std::cout << "Insert agency representative name: (required string)\n";
-    std::cin.ignore();
-    std::getline(std::cin, agencyRepName);
-    std::cout << "Insert agency representative phone: (required string)\n";
-    std::getline(std::cin, agencyRepPhone);
-
     Route route(routeIdMapper->generateNextAbstractId(), name, country, city,
-                duration, hotelId, flightId, employeeId, agencyRepName,
-                agencyRepPhone);
+                duration, hotelId, flightId, employeeId);
 
     if (routeGateway.insertRoute(name, country, city, duration,
                                  hotelIdMapper->getRealId(hotelId),
                                  flightIdMapper->getRealId(flightId),
-                                 employeeIdMapper->getRealId(employeeId),
-                                 agencyRepName, agencyRepPhone)) {
+                                 employeeIdMapper->getRealId(employeeId))) {
       std::cout << "Route inserted successfully. " << route.getId() << "\n";
       routeIdMapper->routeVector.push_back(route);
       routeIdMapper->addMapping(route.getId(),
@@ -172,8 +164,6 @@ class RouteMenu {
       int hotelId = route.getHotelId();
       int flightId = route.getFlightId();
       int employeeId = route.getEmployeeId();
-      std::string agencyRepName = route.getAgencyRepName();
-      std::string agencyRepPhone = route.getAgencyRepPhone();
       std::string empName;
       for (const Employees& employee : employeeIdMapper->employeeVector) {
         if (employee.getId() == employeeId) {
@@ -198,8 +188,6 @@ class RouteMenu {
       std::cout << "Hotel: " << hotelName << "\n";
       std::cout << "Flight #" << flightId << "\n";
       std::cout << "Employee name: " << empName << "\n";
-      std::cout << "Agency Representative Name: " << agencyRepName << "\n";
-      std::cout << "Agency Representative Phone: " << agencyRepPhone << "\n";
       std::cout << "\n";
     }
   }
@@ -216,8 +204,7 @@ class RouteMenu {
 
     int realRouteId = routeIdMapper->getRealId(routeId);
 
-    std::string newName, newCountry, newCity, newAgencyRepName,
-        newAgencyRepPhone;
+    std::string newName, newCountry, newCity;
     int newDuration, newHotelId, newFlightId, newEmployeeId;
 
     std::cout << "Enter new name (or press Enter to keep the current value): ";
@@ -291,14 +278,6 @@ class RouteMenu {
       }
     }
 
-    std::cout << "Enter new agency representative name (or press Enter to keep "
-                 "the current value): ";
-    std::getline(std::cin, newAgencyRepName);
-
-    std::cout << "Enter new agency representative phone (or press Enter to "
-                 "keep the current value): ";
-    std::getline(std::cin, newAgencyRepPhone);
-
     for (Route& route : routeIdMapper->routeVector) {
       if (route.getId() == routeIdMapper->getAbstractId(realRouteId)) {
         if (!newName.empty()) {
@@ -343,18 +322,6 @@ class RouteMenu {
           newEmployeeId = route.getEmployeeId();
         }
 
-        if (!newAgencyRepName.empty()) {
-          route.setAgencyRepName(newAgencyRepName);
-        } else {
-          newAgencyRepName = route.getAgencyRepName();
-        }
-
-        if (!newAgencyRepPhone.empty()) {
-          route.setAgencyRepPhone(newAgencyRepPhone);
-        } else {
-          newAgencyRepPhone = route.getAgencyRepPhone();
-        }
-
         break;
       }
     }
@@ -363,8 +330,7 @@ class RouteMenu {
                                  newDuration,
                                  hotelIdMapper->getRealId(newHotelId),
                                  flightIdMapper->getRealId(newFlightId),
-                                 employeeIdMapper->getRealId(newEmployeeId),
-                                 newAgencyRepName, newAgencyRepPhone)) {
+                                 employeeIdMapper->getRealId(newEmployeeId))) {
       std::cout << "Route #" << routeId << " updated successfully.\n";
     } else {
       std::cerr << "Failed to update route #" << routeId << ".\n";

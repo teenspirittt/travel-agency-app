@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "../models/Route.h"
+#include "../../models/Route.h"
 #include "IdMapper.h"
 
 class RouteIdMapper : public IdMapper {

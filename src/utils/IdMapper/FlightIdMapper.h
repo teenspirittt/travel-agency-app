@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "../models/Flights.h"
+#include "../../models/Flights.h"
 #include "IdMapper.h"
 
 class FlightIdMapper : public IdMapper {

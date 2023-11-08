@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-#include "../models/EmployeeTransfers.h"
+#include "../../models/EmployeeTransfers.h"
 #include "IdMapper.h"
 
 class EmployeeTransfersIdMapper : public IdMapper {

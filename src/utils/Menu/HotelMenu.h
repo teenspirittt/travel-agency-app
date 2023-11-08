@@ -1,9 +1,9 @@
 #ifndef RPBD_HOTELMENU_H
 #define RPBD_HOTELMENU_H
 
-#include "../gateways/HotelGateway.h"
-#include "../models/Hotels.h"
-#include "HotelIdMapper.h"
+#include "../../gateways/HotelGateway.h"
+#include "../../models/Hotels.h"
+#include "../IdMapper/HotelIdMapper.h"
 
 class HotelMenu {
  public:

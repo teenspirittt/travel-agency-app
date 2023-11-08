@@ -1,11 +1,11 @@
 #ifndef RPBD_EMPLOYEETRANSFERMENU_H
 #define RPBD_EMPLOYEETRANSFERMENU_H
 
-#include "../gateways/EmployeeGateway.h"
-#include "../gateways/EmployeeTransfersGateway.h"
-#include "../models/EmployeeTransfers.h"
-#include "../utils/EmployeeMenu.h"
-#include "EmployeeTransferIdMapper.h"
+#include "../../gateways/EmployeeGateway.h"
+#include "../../gateways/EmployeeTransfersGateway.h"
+#include "../../models/EmployeeTransfers.h"
+#include "EmployeeMenu.h"
+#include "../IdMapper/EmployeeTransferIdMapper.h"
 
 class EmployeeTransferMenu {
  public:

@@ -1,8 +1,8 @@
 #ifndef RPBD_CARRIERMENU_H
 #define RPBD_CARRIERMENU_H
 
-#include "../gateways/CarrierGateway.h"
-#include "CarrierIdMapper.h"
+#include "../../gateways/CarrierGateway.h"
+#include "../IdMapper/CarrierIdMapper.h"
 
 class CarrierMenu {
  public:
@@ -76,8 +76,7 @@ class CarrierMenu {
         }
       }
     } else {
-      std::cerr << "Failed to delete carrier with abstract ID " << abstractId
-                << ".\n";
+      std::cerr << "Failed to delete carrier." << abstractId << ".\n";
     }
   }
 

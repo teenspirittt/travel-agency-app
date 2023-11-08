@@ -1,9 +1,9 @@
 #ifndef RPBD_EMPLOYEEMENU_H
 #define RPBD_EMPLOYEEMENU_H
 
-#include "../gateways/EmployeeGateway.h"
-#include "../models/Employees.h"
-#include "EmployeeIdMapper.h"
+#include "../../gateways/EmployeeGateway.h"
+#include "../../models/Employees.h"
+#include "../IdMapper/EmployeeIdMapper.h"
 
 class EmployeeMenu {
  public:

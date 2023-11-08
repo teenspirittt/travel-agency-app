@@ -1,9 +1,9 @@
 #ifndef RPBD_CLIENTMENU_H
 #define RPBD_CLIENTMENU_H
 
-#include "../gateways/ClientGateway.h"
-#include "../models/Clients.h"
-#include "ClientIdMapper.h"
+#include "../../gateways/ClientGateway.h"
+#include "../../models/Clients.h"
+#include "../IdMapper/ClientIdMapper.h"
 
 class ClientMenu {
  public:

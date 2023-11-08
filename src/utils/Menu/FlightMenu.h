@@ -1,13 +1,13 @@
 #ifndef RPBD_FLIGHTMENU_H
 #define RPBD_FLIGHTMENU_H
 
-#include "../gateways/AircraftGateway.h"
-#include "../gateways/CarrierGateway.h"
-#include "../gateways/FlightsGateway.h"
-#include "../models/Flights.h"
+#include "../../gateways/AircraftGateway.h"
+#include "../../gateways/CarrierGateway.h"
+#include "../../gateways/FlightsGateway.h"
+#include "../../models/Flights.h"
 #include "AircraftMenu.h"
 #include "CarrierMenu.h"
-#include "FlightIdMapper.h"
+#include "../IdMapper/FlightIdMapper.h"
 
 class FlightMenu {
  public:
