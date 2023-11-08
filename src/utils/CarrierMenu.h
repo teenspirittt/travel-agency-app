@@ -88,7 +88,7 @@ class CarrierMenu {
       int abstractId = carrier.getId();
       std::string name = carrier.getName();
 
-      std::cout << "#: " << abstractId << "\n";
+      std::cout << "#" << abstractId << "\n";
       std::cout << "Name: " << name << "\n";
       std::cout << "\n";
     }

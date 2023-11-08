@@ -25,7 +25,7 @@ bool ClientRouteGateway::updateClientRoute(int clientId, int routeId,
       "UPDATE Client_Route SET client_id =" + std::to_string(clientId) +
       ", route_id = " + std::to_string(routeId) +
       " WHERE client_id =  " + std::to_string(newCID) +
-      " AND route id =" + std::to_string(newRID);
+      " AND route_id =" + std::to_string(newRID);
 
   return sqlExecuter->executeSQL(query);
 }
@@ -55,15 +55,18 @@ bool ClientRouteGateway::getAllClientRoutes(
     SQLRETURN ret = SQL_SUCCESS;
     while (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
       int clientId, routeId;
-      ret = SQLGetData(hstmt, 1, SQL_C_LONG, &clientId, 0, NULL);
-      ret = SQLGetData(hstmt, 2, SQL_C_LONG, &routeId, 0, NULL);
+
+      ret = SQLFetch(hstmt);
       if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
-        clientRoutePairs.push_back(std::make_pair(clientId, routeId));
+        ret = SQLGetData(hstmt, 1, SQL_C_LONG, &clientId, 0, NULL);
+        ret = SQLGetData(hstmt, 2, SQL_C_LONG, &routeId, 0, NULL);
+
+        clientRoutePairs.emplace_back(clientId, routeId);
       }
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    return true;
+    return !clientRoutePairs.empty();
   }
 
   return false;

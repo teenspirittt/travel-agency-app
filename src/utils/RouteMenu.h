@@ -2,6 +2,8 @@
 #define RPBD_ROUTEMENU_H
 
 #include "../gateways/RouteGateway.h"
+#include "../models/Employees.h"
+#include "../models/Hotels.h"
 #include "../models/Route.h"
 #include "EmployeeIdMapper.h"
 #include "EmployeeMenu.h"
@@ -74,9 +76,9 @@ class RouteMenu {
     std::cin >> hotelId;
 
     if (!HotelMenu::isHotelIdValid(hotelId, *hotelIdMapper)) {
-      std::cerr << "Hotel with ID " << hotelId << " does not exist.\n";
+      std::cerr << "Hotel #" << hotelId << " does not exist.\n";
       if (HotelMenu::displayAllHotels(*hotelIdMapper)) {
-        std::cout << "Please choose an existing hotel ID.\n";
+        std::cout << "Please choose an existing hotel.\n";
         return;
       } else {
         std::cerr << "No hotels available. Cannot proceed.\n";
@@ -84,12 +86,12 @@ class RouteMenu {
       }
     }
 
-    std::cout << "Insert flight ID: (required int)\n";
+    std::cout << "Insert flight number: (required int)\n";
     FlightMenu::displayAllFlights(*flightIdMapper);
     std::cin >> flightId;
 
     if (!FlightMenu::isFlightIdValid(flightId, *flightIdMapper)) {
-      std::cerr << "Flight with ID " << flightId << " does not exist.\n";
+      std::cerr << "Flight #" << flightId << " does not exist.\n";
       if (FlightMenu::displayAllFlights(*flightIdMapper)) {
         std::cout << "Please choose an existing flight ID.\n";
         return;
@@ -99,14 +101,14 @@ class RouteMenu {
       }
     }
 
-    std::cout << "Insert employee ID: (required int)\n";
+    std::cout << "Insert employee number: (required int)\n";
     EmployeeMenu::displayAllEmployees(*employeeIdMapper);
     std::cin >> employeeId;
 
     if (!EmployeeMenu::isEmployeeIdValid(employeeId, *employeeIdMapper)) {
-      std::cerr << "Employee with ID " << employeeId << " does not exist.\n";
+      std::cerr << "Employee #" << employeeId << " does not exist.\n";
       if (EmployeeMenu::displayAllEmployees(*employeeIdMapper)) {
-        std::cout << "Please choose an existing employee ID.\n";
+        std::cout << "Please choose an existing employee.\n";
         return;
       } else {
         std::cerr << "No employees available. Cannot proceed.\n";
@@ -140,12 +142,11 @@ class RouteMenu {
 
   void deleteRoute() {
     int abstractId;
-    std::cout << "Insert ID to delete\n";
+    std::cout << "Insert number to delete\n";
     std::cin >> abstractId;
 
     if (routeGateway.deleteRoute(routeIdMapper->getRealId(abstractId))) {
-      std::cout << "Route with abstract ID " << abstractId
-                << " deleted successfully.\n";
+      std::cout << "Route #" << abstractId << " deleted successfully.\n";
       for (auto it = routeIdMapper->routeVector.begin();
            it != routeIdMapper->routeVector.end(); ++it) {
         if (it->getId() == abstractId) {
@@ -173,15 +174,30 @@ class RouteMenu {
       int employeeId = route.getEmployeeId();
       std::string agencyRepName = route.getAgencyRepName();
       std::string agencyRepPhone = route.getAgencyRepPhone();
+      std::string empName;
+      for (const Employees& employee : employeeIdMapper->employeeVector) {
+        if (employee.getId() == employeeId) {
+          empName = employee.getFullName();
+          break;
+        }
+      }
 
-      std::cout << "Abstract ID: " << abstractId << "\n";
+      std::string hotelName;
+      for (const Hotels& hotel : hotelIdMapper->hotelVector) {
+        if (hotel.getId() == hotelId) {
+          hotelName = hotel.getName();
+          break;
+        }
+      }
+
+      std::cout << "#" << abstractId << "\n";
       std::cout << "Name: " << name << "\n";
       std::cout << "Country: " << country << "\n";
       std::cout << "City: " << city << "\n";
       std::cout << "Duration: " << duration << " days\n";
-      std::cout << "Hotel ID: " << hotelId << "\n";
-      std::cout << "Flight ID: " << flightId << "\n";
-      std::cout << "Employee ID: " << employeeId << "\n";
+      std::cout << "Hotel: " << hotelName << "\n";
+      std::cout << "Flight #" << flightId << "\n";
+      std::cout << "Employee name: " << empName << "\n";
       std::cout << "Agency Representative Name: " << agencyRepName << "\n";
       std::cout << "Agency Representative Phone: " << agencyRepPhone << "\n";
       std::cout << "\n";
@@ -190,11 +206,11 @@ class RouteMenu {
 
   void updateRoute() {
     int routeId;
-    std::cout << "Enter the ID of the route you want to update: ";
+    std::cout << "Enter the number of the route you want to update: ";
     std::cin >> routeId;
 
     if (!routeIdMapper->getRealId(routeId)) {
-      std::cerr << "Route with ID " << routeId << " does not exist.\n";
+      std::cerr << "Route #" << routeId << " does not exist.\n";
       return;
     }
 
@@ -230,8 +246,8 @@ class RouteMenu {
       }
     }
 
-    std::cout
-        << "Enter new hotel ID (or press Enter to keep the current value): ";
+    std::cout << "Enter new hotel number (or press Enter to keep the current "
+                 "value): ";
     std::string newHotelIdInput;
     std::getline(std::cin, newHotelIdInput);
 
@@ -239,14 +255,14 @@ class RouteMenu {
       try {
         newHotelId = std::stoi(newHotelIdInput);
       } catch (const std::invalid_argument& e) {
-        std::cerr
-            << "Invalid input for hotel ID. Please enter a valid integer.\n";
+        std::cerr << "Invalid input for hotel number. Please enter a valid "
+                     "integer.\n";
         return;
       }
     }
 
-    std::cout
-        << "Enter new flight ID (or press Enter to keep the current value): ";
+    std::cout << "Enter new flight number (or press Enter to keep the current "
+                 "value): ";
     std::string newFlightIdInput;
     std::getline(std::cin, newFlightIdInput);
 
@@ -254,14 +270,14 @@ class RouteMenu {
       try {
         newFlightId = std::stoi(newFlightIdInput);
       } catch (const std::invalid_argument& e) {
-        std::cerr
-            << "Invalid input for flight ID. Please enter a valid integer.\n";
+        std::cerr << "Invalid input for flight number. Please enter a valid "
+                     "integer.\n";
         return;
       }
     }
 
-    std::cout
-        << "Enter new employee ID (or press Enter to keep the current value): ";
+    std::cout << "Enter new employee number (or press Enter to keep the "
+                 "current value): ";
     std::string newEmployeeIdInput;
     std::getline(std::cin, newEmployeeIdInput);
 
@@ -269,8 +285,8 @@ class RouteMenu {
       try {
         newEmployeeId = std::stoi(newEmployeeIdInput);
       } catch (const std::invalid_argument& e) {
-        std::cerr
-            << "Invalid input for employee ID. Please enter a valid integer.\n";
+        std::cerr << "Invalid input for employee number. Please enter a valid "
+                     "integer.\n";
         return;
       }
     }
@@ -349,9 +365,9 @@ class RouteMenu {
                                  flightIdMapper->getRealId(newFlightId),
                                  employeeIdMapper->getRealId(newEmployeeId),
                                  newAgencyRepName, newAgencyRepPhone)) {
-      std::cout << "Route with ID " << routeId << " updated successfully.\n";
+      std::cout << "Route #" << routeId << " updated successfully.\n";
     } else {
-      std::cerr << "Failed to update route with ID " << routeId << ".\n";
+      std::cerr << "Failed to update route #" << routeId << ".\n";
     }
   }
 
@@ -372,7 +388,7 @@ class RouteMenu {
 
     std::cout << "Available Routes:\n";
     for (const Route& route : idMapper.routeVector) {
-      std::cout << "{id=" << route.getId() << "; name=\"" << route.getName()
+      std::cout << "{#" << route.getId() << "; name=\"" << route.getName()
                 << "\"}\n";
     }
     return true;

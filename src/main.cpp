@@ -219,7 +219,6 @@ int main() {
       for (const auto &clientRouteData : clientRoutes) {
         int clientId = clientRouteData.first;
         int routeId = clientRouteData.second;
-
         ClientRoute clientRoute(clientIdMapper.getAbstractId(clientId),
                                 routeIdMapper.getAbstractId(routeId));
         clientRouteObjects.push_back(clientRoute);
@@ -229,7 +228,7 @@ int main() {
 
     int choice;
     do {
-      std::cout << "\n\nMain Menu:\n";
+      std::cout << "\n\nMain  Menu:\n";
       std::cout << "1. Aircraft Menu\n";
       std::cout << "2. Carrier Menu\n";
       std::cout << "3. Client Route Menu\n";

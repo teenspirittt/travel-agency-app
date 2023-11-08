@@ -21,7 +21,7 @@ class ClientRouteMenu {
   void displayMenu() {
     int choice;
     do {
-      std::cout << "\ClientRoute Menu:\n";
+      std::cout << "\nClientRoute Menu:\n";
       std::cout << "1. Insert ClientRoute\n";
       std::cout << "2. Delete ClientRoute\n";
       std::cout << "3. Update ClientRoute\n";
@@ -123,10 +123,10 @@ class ClientRouteMenu {
       return;
     }
     int newClientId, newRouteId;
-    std::cout << "Enter the number of the client: ";
+    std::cout << "Enter new number of the client: ";
     std::cin >> newClientId;
 
-    std::cout << "Enter the number of the client: ";
+    std::cout << "Enter new number of the route: ";
     std::cin >> newRouteId;
 
     for (ClientRoute& croute : clientRouteObjects) {
@@ -164,14 +164,15 @@ class ClientRouteMenu {
     }
 
     std::cout << "All Client-Route Relationships:\n";
-
+    int i = 1;
     for (const ClientRoute& clientRoute : clientRouteObjects) {
       int clientId = clientRoute.getClientId();
       int routeId = clientRoute.getRouteId();
-
-      std::cout << "Client #: " << clientId << "\n";
-      std::cout << "Route #: " << routeId << "\n";
+      std::cout << "#" << i << " pair\n";
+      std::cout << "Client #" << clientId << "\n";
+      std::cout << "Route #" << routeId << "\n";
       std::cout << "\n";
+      i++;
     }
   }
 

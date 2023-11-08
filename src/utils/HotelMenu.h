@@ -73,12 +73,11 @@ class HotelMenu {
 
   void deleteHotel() {
     int abstractId;
-    std::cout << "Insert ID to delete\n";
+    std::cout << "Insert number to delete\n";
     std::cin >> abstractId;
 
     if (hotelGateway.deleteHotel(hotelIdMapper->getRealId(abstractId))) {
-      std::cout << "Hotel with abstract ID " << abstractId
-                << " deleted successfully.\n";
+      std::cout << "Hotel #" << abstractId << " deleted successfully.\n";
 
       for (auto it = hotelIdMapper->hotelVector.begin();
            it != hotelIdMapper->hotelVector.end(); ++it) {
@@ -88,8 +87,7 @@ class HotelMenu {
         }
       }
     } else {
-      std::cerr << "Failed to delete hotel with abstract ID " << abstractId
-                << ".\n";
+      std::cerr << "Failed to delete hotel #" << abstractId << ".\n";
     }
   }
 
@@ -102,7 +100,7 @@ class HotelMenu {
       int hotelClass = hotel.getHotelClass();
       std::string roomCategory = hotel.getRoomCategory();
 
-      std::cout << "Abstract ID: " << abstractId << "\n";
+      std::cout << "#" << abstractId << "\n";
       std::cout << "Name: " << name << "\n";
       std::cout << "Hotel class: " << hotelClass << "\n";
       std::cout << "Room category: " << roomCategory << "\n";
@@ -112,12 +110,11 @@ class HotelMenu {
 
   void updateHotel() {
     int abstractId;
-    std::cout << "Enter the ID of the hotel you want to update: ";
+    std::cout << "Enter the number of the hotel you want to update: ";
     std::cin >> abstractId;
 
     if (!hotelIdMapper->getRealId(abstractId)) {
-      std::cerr << "Hotel with abstract ID " << abstractId
-                << " does not exist.\n";
+      std::cerr << "Hotel #" << abstractId << " does not exist.\n";
       return;
     }
 
@@ -171,11 +168,9 @@ class HotelMenu {
 
     if (hotelGateway.updateHotel(realHotelId, newName, newHotelClass,
                                  newRoomCategory)) {
-      std::cout << "Hotel with abstract ID " << abstractId
-                << " updated successfully.\n";
+      std::cout << "Hotel #" << abstractId << " updated successfully.\n";
     } else {
-      std::cerr << "Failed to update hotel with abstract ID " << abstractId
-                << ".\n";
+      std::cerr << "Failed to update hotel #" << abstractId << ".\n";
     }
   }
 
@@ -196,7 +191,7 @@ class HotelMenu {
 
     std::cout << "Available Hotels:\n";
     for (const Hotels &hotel : idMapper.hotelVector) {
-      std::cout << "{id=" << hotel.getId() << "; name=\"" << hotel.getName()
+      std::cout << "{#" << hotel.getId() << "; name=\"" << hotel.getName()
                 << "\"}\n";
     }
     return true;

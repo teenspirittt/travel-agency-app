@@ -163,7 +163,7 @@ bool AircraftGateway::findAircraftByCarrier(
     return !matchingAircraftIds.empty();
   }
 
-  std::cout << "Failed to execute SQL or no matching aircraft found."
+  std::cout << "Failed to execute  SQL or no matching aircraft found."
             << std::endl;
   return false;
 }
@@ -188,7 +188,5 @@ int AircraftGateway::getLastInsertedId() {
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
   }
-
-  std::cerr << "Failed to get the last inserted ID.\n";
   return -1;
 }
