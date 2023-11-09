@@ -5,9 +5,9 @@
 #include "../../gateways/CarrierGateway.h"
 #include "../../gateways/FlightsGateway.h"
 #include "../../models/Flights.h"
+#include "../IdMapper/FlightIdMapper.h"
 #include "AircraftMenu.h"
 #include "CarrierMenu.h"
-#include "../IdMapper/FlightIdMapper.h"
 
 class FlightMenu {
  public:
@@ -102,8 +102,13 @@ class FlightMenu {
 
   void deleteFlight() {
     int abstractId;
+    displayAllFlights(*flightIdMapper);
     std::cout << "Insert number to delete\n";
     std::cin >> abstractId;
+
+    if (!isFlightIdValid(abstractId, *flightIdMapper)) {
+      std::cerr << "Not existing flight #" << abstractId << ".\n";
+    }
 
     if (flightGateway.deleteFlight(flightIdMapper->getRealId(abstractId))) {
       std::cout << "Flight #" << abstractId << " deleted successfully.\n";

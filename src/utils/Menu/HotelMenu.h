@@ -73,8 +73,13 @@ class HotelMenu {
 
   void deleteHotel() {
     int abstractId;
+    displayAllHotels(*hotelIdMapper);
     std::cout << "Insert number to delete\n";
     std::cin >> abstractId;
+
+    if (!isHotelIdValid(abstractId, *hotelIdMapper)) {
+      std::cerr << "Not existing hotel #" << abstractId << ".\n";
+    }
 
     if (hotelGateway.deleteHotel(hotelIdMapper->getRealId(abstractId))) {
       std::cout << "Hotel #" << abstractId << " deleted successfully.\n";

@@ -4,8 +4,8 @@
 #include "../../gateways/EmployeeGateway.h"
 #include "../../gateways/EmployeeTransfersGateway.h"
 #include "../../models/EmployeeTransfers.h"
-#include "EmployeeMenu.h"
 #include "../IdMapper/EmployeeTransferIdMapper.h"
+#include "EmployeeMenu.h"
 
 class EmployeeTransferMenu {
  public:
@@ -244,6 +244,30 @@ class EmployeeTransferMenu {
     } else {
       std::cerr << "Failed to update employee #" << abstractId << ".\n";
     }
+  }
+
+  static bool isEmployeeTransferIdValid(
+      int transferId, const EmployeeTransfersIdMapper& idMapper) {
+    for (const EmployeeTransfers& employee : idMapper.employeeTransfersVector) {
+      if (employee.getId() == transferId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static bool displayAllEmployeeTransfer(
+      const EmployeeTransfersIdMapper& idMapper) {
+    if (idMapper.employeeTransfersVector.empty()) {
+      std::cerr << "No employees available. Cannot proceed.\n";
+      return false;
+    }
+
+    std::cout << "Available transfers:\n";
+    for (const EmployeeTransfers& employee : idMapper.employeeTransfersVector) {
+      std::cout << "{#" << employee.getId() << "}";
+    }
+    return true;
   }
 
  private:

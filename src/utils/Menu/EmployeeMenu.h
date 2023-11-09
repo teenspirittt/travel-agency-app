@@ -82,8 +82,13 @@ class EmployeeMenu {
 
   void deleteEmployee() {
     int abstractId;
+    displayAllEmployees(*employeeIdMapper);
     std::cout << "Insert number to delete\n";
     std::cin >> abstractId;
+
+    if (!isEmployeeIdValid(abstractId, *employeeIdMapper)) {
+      std::cerr << "Not existing employee #" << abstractId << ".\n";
+    }
 
     if (employeeGateway.deleteEmployee(
             employeeIdMapper->getRealId(abstractId))) {
@@ -158,6 +163,7 @@ class EmployeeMenu {
     int realEmployeeId = employeeIdMapper->getRealId(abstractId);
     std::string newFullName, newAddress, newDateOfBirth, newPosition;
     double newSalary;
+    std::string newSalaryInput;
 
     std::cout
         << "Enter new full name (or press Enter to keep the current value): ";
@@ -170,7 +176,8 @@ class EmployeeMenu {
 
     std::cout << "Enter new date of birth (or press Enter to keep the current "
                  "value): ";
-    std::cin >> newDateOfBirth;
+    std::cin.ignore();
+    std::getline(std::cin, newDateOfBirth);
 
     std::cout
         << "Enter new position (or press Enter to keep the current value): ";
@@ -179,7 +186,8 @@ class EmployeeMenu {
 
     std::cout
         << "Enter new salary (or press Enter to keep the current value): ";
-    std::cin >> newSalary;
+    std::cin.ignore();
+    std::getline(std::cin, newSalaryInput);
 
     for (Employees& employee : employeeIdMapper->employeeVector) {
       if (employee.getId() == employeeIdMapper->getAbstractId(realEmployeeId)) {
@@ -207,8 +215,8 @@ class EmployeeMenu {
           newPosition = employee.getPosition();
         }
 
-        if (newSalary != 0.0) {
-          employee.setSalary(newSalary);
+        if (!newSalaryInput.empty()) {
+          employee.setSalary(std::stoi(newSalaryInput));
         } else {
           newSalary = employee.getSalary();
         }

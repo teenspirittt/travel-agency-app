@@ -96,8 +96,13 @@ class AircraftMenu {
 
   void deleteAircraft() {
     int abstractId;
+    displayAllAircraft(*aircraftIdMapper);
     std::cout << "Insert number to delete\n";
     std::cin >> abstractId;
+
+    if (!isAircraftIdValid(abstractId, *aircraftIdMapper)) {
+      std::cerr << "Not existing aircraft #" << abstractId << ".\n";
+    }
 
     if (aircraftGateway.deleteAircraft(
             aircraftIdMapper->getRealId(abstractId))) {

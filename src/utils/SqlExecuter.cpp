@@ -14,16 +14,16 @@ bool SqlExecuter::executeSQL(const std::string& sqlQuery) {
 
   ret = SQLAllocHandle(SQL_HANDLE_STMT, dbConnector->getConnection(), &hstmt);
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    std::cerr << "Failed to allocate statement handle." << std::endl;
+    std::cerr << "Failed to  allocate statement handle.\n" << std::endl;
     return false;
   }
 
   ret = SQLExecDirect(hstmt, (SQLCHAR*)sqlQuery.c_str(), SQL_NTS);
 
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    std::cerr << "SQL query execution failed." << std::endl;
-    std::cout << sqlQuery;
+    std::cerr << "SQL query execution failed.\n" << std::endl;
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    std::cout << sqlQuery;
     return false;
   }
 
@@ -45,9 +45,9 @@ bool SqlExecuter::executeSQLWithResults(const std::string& sqlQuery,
   ret = SQLExecDirect(hstmt, (SQLCHAR*)sqlQuery.c_str(), SQL_NTS);
 
   if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-    std::cerr << "SQL query execution failed." << std::endl;
-    std::cout << sqlQuery;
+    std::cerr << "SQL query execution failed.\n" << std::endl;
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    std::cout << sqlQuery;
     return false;
   }
 

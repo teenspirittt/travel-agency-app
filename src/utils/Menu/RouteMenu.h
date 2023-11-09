@@ -134,9 +134,12 @@ class RouteMenu {
 
   void deleteRoute() {
     int abstractId;
+    displayAllRoutes(*routeIdMapper);
     std::cout << "Insert number to delete\n";
     std::cin >> abstractId;
-
+    if (!isRouteIdValid(abstractId, *routeIdMapper)) {
+      std::cerr << "Not existing route #" << abstractId << ".\n";
+    }
     if (routeGateway.deleteRoute(routeIdMapper->getRealId(abstractId))) {
       std::cout << "Route #" << abstractId << " deleted successfully.\n";
       for (auto it = routeIdMapper->routeVector.begin();
@@ -193,6 +196,7 @@ class RouteMenu {
   }
 
   void updateRoute() {
+    displayAllRoutes(*routeIdMapper);
     int routeId;
     std::cout << "Enter the number of the route you want to update: ";
     std::cin >> routeId;
@@ -237,10 +241,10 @@ class RouteMenu {
                  "value): ";
     std::string newHotelIdInput;
     std::getline(std::cin, newHotelIdInput);
-
     if (!newHotelIdInput.empty()) {
       try {
         newHotelId = std::stoi(newHotelIdInput);
+        std::cout << "00000000000000";
       } catch (const std::invalid_argument& e) {
         std::cerr << "Invalid input for hotel number. Please enter a valid "
                      "integer.\n";
@@ -303,20 +307,19 @@ class RouteMenu {
         } else {
           newDuration = route.getDuration();
         }
-
-        if (newHotelId != 0) {
+        if (!newHotelIdInput.empty()) {
           route.setHotelId(newHotelId);
         } else {
           newHotelId = route.getHotelId();
         }
 
-        if (newFlightId != 0) {
+        if (!newFlightIdInput.empty()) {
           route.setFlightId(newFlightId);
         } else {
           newFlightId = route.getFlightId();
         }
 
-        if (newEmployeeId != 0) {
+        if (!newEmployeeIdInput.empty()) {
           route.setEmployeeId(newEmployeeId);
         } else {
           newEmployeeId = route.getEmployeeId();

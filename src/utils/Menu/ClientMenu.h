@@ -75,7 +75,12 @@ class ClientMenu {
   void deleteClient() {
     int abstractId;
     std::cout << "Insert number to delete\n";
+    displayAllClients(*clientIdMapper);
     std::cin >> abstractId;
+
+    if (!isClientIdValid(abstractId, *clientIdMapper)) {
+      std::cerr << "Not existing client #" << abstractId << ".\n";
+    }
 
     if (clientGateway.deleteClient(clientIdMapper->getRealId(abstractId))) {
       std::cout << "Client #" << abstractId << " deleted successfully.\n";

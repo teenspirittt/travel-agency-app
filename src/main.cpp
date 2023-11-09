@@ -226,7 +226,7 @@ int main() {
 
     int choice;
     do {
-      std::cout << "\n\nMain  Menu:\n";
+      std::cout << "\n\nMain Menu:\n";
       std::cout << "1. Aircraft Menu\n";
       std::cout << "2. Carrier Menu\n";
       std::cout << "3. Client Route Menu\n";

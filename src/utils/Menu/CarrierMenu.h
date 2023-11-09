@@ -62,8 +62,13 @@ class CarrierMenu {
 
   void deleteCarrier() {
     int abstractId;
+    displayAllCarriers(*carrierIdMapper);
     std::cout << "Insert ID to delete\n";
     std::cin >> abstractId;
+
+    if (!isCarrierIdValid(abstractId, *carrierIdMapper)) {
+      std::cerr << "Not existing carrier #" << abstractId << ".\n";
+    }
 
     if (carrierGateway.deleteCarrier(carrierIdMapper->getRealId(abstractId))) {
       std::cout << "Carrier #" << abstractId << " deleted successfully.\n";
